@@ -383,6 +383,8 @@ void SkyEngine::delay(int32 amount) {
 					}
                 }
 
+		_system->updateScreen();
+
                 if (amount > 0)
                         _system->delayMillis((amount > 10) ? 10 : amount);
         }
