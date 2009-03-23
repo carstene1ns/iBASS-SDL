@@ -1257,7 +1257,6 @@ script:
 	/// low level interface to interpreter
 
 	uint16 moduleNo = scriptNo >> 12;
-	debug(3, "Doing Script %x", (offset << 16) | scriptNo);
 	uint16 *scriptData = _moduleList[moduleNo]; // get module address
 
 	if (!scriptData) { // We need to load the script module
@@ -1280,11 +1279,13 @@ script:
 		offset = 14408;
 	}
 
+	debug(3, "Doing Script: %d:%d:%x", moduleNo, scriptNo & 0xFFF, offset ? (offset - moduleStart[scriptNo & 0xFFF]) : 0);
+
 	// Check whether we have an offset or what
 	if (offset)
 		scriptData = moduleStart + offset;
 	else
-		scriptData += scriptData[scriptNo & 0x0fff];
+		scriptData += scriptData[scriptNo & 0x0FFF];
 
 	//iBASS: gameplay hacks
 	if (!offset) {
