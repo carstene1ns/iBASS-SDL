@@ -395,9 +395,10 @@ void SkyEngine::delay(int32 amount) {
 
 bool SkyEngine::isDemo(void) {
 	switch (_systemVars.gameVersion) {
-	case 109: // pc gamer demo
-	case 267: // floppy demo
-	case 365: // cd demo
+	case 109: // PC Gamer demo
+	case 267: // English floppy demo
+	case 272: // German floppy demo
+	case 365: // CD demo
 		return true;
 	case 288:
 	case 303:
@@ -416,6 +417,7 @@ bool SkyEngine::isCDVersion(void) {
 	switch (_systemVars.gameVersion) {
 	case 109:
 	case 267:
+	case 272:
 	case 288:
 	case 303:
 	case 331:
