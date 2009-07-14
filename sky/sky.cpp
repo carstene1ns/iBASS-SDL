@@ -263,7 +263,15 @@ bool SkyEngine::runGameCycle() {
 
 			_skyScreen->recreate();
 			_skyScreen->spriteEngine();
-
+#if 0
+			if (_debugger->showGrid()) {
+				uint8 *grid = _skyLogic->_skyGrid->giveGrid(Logic::_scriptVariables[SCREEN]);
+				if (grid) {
+					_skyScreen->showGrid(grid);
+					_skyScreen->forceRefresh();
+				}
+			}
+#endif
 			_skyScreen->flip();
 		}//if !paused
 
