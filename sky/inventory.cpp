@@ -88,7 +88,7 @@ bool Logic::fnStartMenu(uint32 firstObject, uint32 highlightedId, uint32 c)
 		if	(_scriptVariables[i]==24581 ||_scriptVariables[i]==24628)
 			continue;
 
-		if ( _scriptVariables[i] )
+		if (_scriptVariables[i])
 			_objectList[menuLength++] = _scriptVariables[i];
 	}
 	_scriptVariables[MENU_LENGTH] = menuLength;
