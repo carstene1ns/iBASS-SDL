@@ -150,7 +150,7 @@ void Mouse::replaceMouseCursors(uint16 fileNo) {
 	_objectMouseData = _skyDisk->loadFile(fileNo);
 }
 
-bool Mouse::fnAddHuman(void) {
+bool Mouse::fnAddHuman() {
 	//reintroduce the mouse so that the human can control the player
 	//could still be switched out at high-level
 
@@ -240,16 +240,16 @@ bool Mouse::fnAddHuman(void) {
 	return true;
 }
 
-void Mouse::fnSaveCoods(void) {
+void Mouse::fnSaveCoods() {
 	Logic::_scriptVariables[SAFEX] = _mouseX + TOP_LEFT_X;
 	Logic::_scriptVariables[SAFEY] = _mouseY + TOP_LEFT_Y;
 }
 
-void Mouse::lockMouse(void) {
+void Mouse::lockMouse() {
 	SkyEngine::_systemVars.systemFlags |= SF_MOUSE_LOCKED;
 }
 
-void Mouse::unlockMouse(void) {
+void Mouse::unlockMouse() {
 	SkyEngine::_systemVars.systemFlags &= ~SF_MOUSE_LOCKED;
 }
 
@@ -2007,7 +2007,7 @@ uint16	Mouse::givePointerTextY()//tony1may09
 
 //----------------------------------------------------------------------------------------------------------------------------------
 /*
-void Mouse::buttonEngine1(void)
+void Mouse::buttonEngine1()
 {
 	//checks for clicking on special item
 	//"compare the size of this routine to S1 mouse_button"
@@ -2070,7 +2070,7 @@ void Mouse::fnOpenCloseHand(bool open) {
 	spriteMouse(0, 5, 5);
 }
 
-bool Mouse::wasClicked(void) {
+bool Mouse::wasClicked() {
 //printf("was clicked\n");
 	if (_logicClick==1) {
 		_logicClick++;//stop repeating next time?
