@@ -1112,8 +1112,7 @@ Sound::Sound(Disk *pDisk, OtherSystem *pSystem, uint8 pVolume) {
 }
 
 Sound::~Sound() {
-	if (_soundData)
-		free(_soundData);
+	free(_soundData);
 
 	delete _speechFS;
 }
@@ -1131,8 +1130,7 @@ void Sound::loadSection(uint8 pSection) {
 
 	g_section = pSection;
 
-	if (_soundData)
-		free(_soundData);
+	free(_soundData);
 	_soundData = _skyDisk->loadFile(pSection * 4 + SOUND_FILE_BASE);
 	uint16 asmOfs;
 	if (SkyEngine::_systemVars.gameVersion == 109) {
