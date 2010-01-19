@@ -31,6 +31,8 @@
 #include "sky/sound.h"
 #include "sky/struc.h"
 
+#include "sound/raw.h"
+
 namespace Sky {
 
 #define SOUND_FILE_BASE 60203
@@ -1202,10 +1204,12 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 		flags |= Audio::Mixer::FLAG_LOOP;
 	}
 
+	Audio::AudioStream *stream = Audio::makeRawMemoryStream(_soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, loopSta, loopEnd);
+
 	if (channel == 0)
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
+		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound0, stream, SOUND_CH0, volume, 0);
 	else
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
+		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound1, stream, SOUND_CH1, volume, 0);
 #endif
 	_system->playSFX(g_section, sound, channel & 1, (float)volume / 255.0f, dataLoop != 0);
 }
