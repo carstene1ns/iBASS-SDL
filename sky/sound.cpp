@@ -1203,9 +1203,9 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	}
 
 	if (channel == 0)
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
+		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
 	else
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
+		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
 #endif
 	_system->playSFX(g_section, sound, channel & 1, (float)volume / 255.0f, dataLoop != 0);
 }
