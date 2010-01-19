@@ -31,6 +31,7 @@
 #include "sky/sound.h"
 #include "sky/struc.h"
 
+#include "sound/audiostream.h"
 #include "sound/raw.h"
 
 namespace Sky {
@@ -1195,13 +1196,13 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	dataOfs += _sfxBaseOfs;
 
 #if 0
-	byte flags = Audio::Mixer::FLAG_UNSIGNED;
+	byte flags = Audio::FLAG_UNSIGNED;
 
 	uint32 loopSta = 0, loopEnd = 0;
 	if (dataLoop) {
 		loopSta = dataSize - dataLoop;
 		loopEnd = dataSize;
-		flags |= Audio::Mixer::FLAG_LOOP;
+		flags |= Audio::FLAG_LOOP;
 	}
 
 	Audio::AudioStream *stream = Audio::makeRawMemoryStream(_soundData + dataOfs, dataSize, DisposeAfterUse::NO, sampleRate, flags, loopSta, loopEnd);
