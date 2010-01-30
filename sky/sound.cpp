@@ -1196,7 +1196,7 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	dataOfs += _sfxBaseOfs;
 
 #if 0
-	Audio::SeekableAudioStream *stream = Audio::makeRawMemoryStream(_soundData + dataOfs, dataSize, sampleRate,
+	Audio::SeekableAudioStream *stream = Audio::makeRawStream(_soundData + dataOfs, dataSize, sampleRate,
 	                                                                Audio::FLAG_UNSIGNED, DisposeAfterUse::NO);
 
 	Audio::AudioStream *output = 0;
