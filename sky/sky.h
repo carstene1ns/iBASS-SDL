@@ -33,8 +33,8 @@
  *
  * Status of this engine: ???
  *
- * Supported games:
- * - ???
+ * Games using this engine:
+ * - Beneath a Steel Sky
  */
 namespace Sky {
 
