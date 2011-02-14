@@ -170,8 +170,6 @@ protected:
 	void initItemList();
 
 	void initVirgin();
-	static uint32 timerHandler(uint32 interval, void *ptr);
-
 	void loadFixedItems();
 
 	bool _shouldQuit;

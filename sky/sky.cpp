@@ -306,6 +306,7 @@ bool SkyEngine::runGameCycle() {
 			}
 			//-----------------------------------------------------------------
 
+			_skyScreen->processSequence();
 			_skyScreen->recreate();
 			_skyScreen->spriteEngine();
 #if 0
@@ -373,15 +374,6 @@ void SkyEngine::loadFixedItems() {
 
 void *SkyEngine::fetchItem(uint32 num) {
 	return _itemList[num];
-}
-
-uint32 SkyEngine::timerHandler(uint32 interval, void *refCon) {
-	((SkyEngine *)refCon)->gotTimerTick();
-        return 1000 / 50;
-}
-
-void SkyEngine::gotTimerTick() {
-	_skyScreen->handleTimer();
 }
 
 // TODO: eventmanager
