@@ -82,6 +82,8 @@ public:
 	SkyEngine(OSystem *syst);
 	virtual ~SkyEngine();
 
+	//virtual void syncSoundSettings();
+
 	static bool isDemo();
 	static bool isCDVersion();
 
