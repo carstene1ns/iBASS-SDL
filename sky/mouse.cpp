@@ -2060,7 +2060,7 @@ void Mouse::fnOpenCloseHand(bool open) {
 	if (open)
 		cursor++;
 
-	uint32 size = ((DataFileHeader*)_objectMouseData)->s_sp_size;
+	uint32 size = ((DataFileHeader *)_objectMouseData)->s_sp_size;
 	uint8 *srcData;
 	uint8 *destData;
 

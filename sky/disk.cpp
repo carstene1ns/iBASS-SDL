@@ -125,7 +125,7 @@ uint8 *Disk::loadFile(uint16 fileNr) {
 }
 
 uint16 *Disk::loadScriptFile(uint16 fileNr) {
-	uint16 *buf = (uint16*)loadFile(fileNr);
+	uint16 *buf = (uint16 *)loadFile(fileNr);
 #ifdef SCUMM_BIG_ENDIAN
 	for (uint i = 0; i < _lastLoadedFileSize / 2; i++)
 		buf[i] = FROM_LE_16(buf[i]);
