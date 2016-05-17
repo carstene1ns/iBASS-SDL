@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef SKY_H
-#define SKY_H
+#ifndef SKY_SKY_H
+#define SKY_SKY_H
 
 #include "system/othsys.h"
 //#include "sky/struc.h"	//MegaSet
