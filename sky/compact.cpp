@@ -26,6 +26,7 @@
 //#include "common/translation.h"
 //#include "gui/message.h"
 #include <stddef.h>	// for ptrdiff_t
+#include <string>
 
 namespace Sky {
 
@@ -123,13 +124,12 @@ static const uint32 turnTableOffsets[] = {
 
 SkyCompact::SkyCompact() {
 	_cptFile = new Common::File();
-	if (!_cptFile->open("sky.cpt")) {
-		//GUI::MessageDialog dialog(_("Unable to find \"sky.cpt\" file!\n"
-		//						  "Please download it from www.scummvm.org"), _("OK"), NULL);
-		//dialog.runModal();
-		error("Unable to find \"sky.cpt\" file");
+	std::string filename = "sky.cpt";
+	if (!_cptFile->open(filename.c_str())) {
+                std::string msg = "You're missing the '" + filename + "' file. Get it from the ScummVM website";
+                //GUIErrorMessage(msg);
+                error("%s", msg.c_str());
 	}
-
 	uint16 fileVersion = _cptFile->readUint16LE();
 	if (fileVersion != 0)
 		error("unknown \"sky.cpt\" version");
