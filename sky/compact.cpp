@@ -316,6 +316,8 @@ uint16 *SkyCompact::getSub(Compact *cpt, uint16 mode) {
 	default:
 		error("Invalid Mode (%d)", mode);
 	}
+
+	return NULL; // CT
 }
 
 uint16 *SkyCompact::getGrafixPtr(Compact *cpt) {
@@ -342,6 +344,8 @@ MegaSet *SkyCompact::getMegaSet(Compact *cpt) {
 	default:
 		error("Invalid MegaSet (%d)", cpt->megaSet);
 	}
+
+	return NULL; // CT
 }
 
 /**

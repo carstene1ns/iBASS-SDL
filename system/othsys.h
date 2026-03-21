@@ -69,7 +69,6 @@ public:
 	virtual void copyRectToScreen(const uint8 *buf, int pitch, int x, int y, int w, int h) = 0;
 
 	virtual void updateScreen(void) = 0;
-//	virtual void setMouseCursor(const byte *buf, int w, int h, int hotspotX, int hotspotY) = 0;
 	virtual void warpMouse(int x, int y) { }
 	virtual uint32 getMillis(void) = 0;
 	virtual void delayMillis(uint32 msecs) = 0;
@@ -97,8 +96,6 @@ public:
 	virtual void clearPauseFlag(void) = 0;
 
 	virtual void playUISFX(int num) = 0;
-
-	virtual void alContextHack(void) = 0;
 
 	virtual void quit(void) const = 0;
 

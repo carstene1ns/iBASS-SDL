@@ -17,50 +17,41 @@
  */
 
 
-#include "system/common.h"
+
+#include <cstdio>
+
+#include "system/types.h"
+#include "system/file.h"
+#include "system/othsys.h"
+#include "system/othsys_sdl.h"
+#include "system/savefile.h"
+#include "sky/sky.h"
+
 #include <time.h>
+#include <stdlib.h>
 
-#define	BUF_SIZE	1024
 
-void error(const char *message, ...) {
-	char buf[BUF_SIZE];
-	va_list va;
+int main(int argc, char *argv[])
+{
+	Common::File::addPath("./");
 
-	va_start(va, message);
-	vsnprintf(buf, BUF_SIZE, message, va);
-	va_end(va);
+	srand( (unsigned)time( NULL ) );
 
-	printf("ERROR: %s\n", buf);
+	SaveFile::setSavePath(".");
 
-	exit (-1);
+	OtherSystem *system = new OtherSystem_SDL(480, 320);
+	Sky::SkyEngine *engine = new Sky::SkyEngine(system);
+
+	assert(system);
+	assert(engine);
+
+	bool res = engine->init();
+	assert(res);
+
+	while (engine->runGameCycle()) { }
+
+	delete engine;
+	delete system;
+
+	return 0;
 }
-
-void debug(int level, const char *message, ...) {
-	if (level>7) return;
-
-	char buf[BUF_SIZE];
-	va_list va;
-
-	va_start(va, message);
-	vsnprintf(buf, BUF_SIZE, message, va);
-	va_end(va);
-
-	printf("DEBUG: %s\n", buf);
-}
-
-void warning(const char *message, ...) {
-	char buf[BUF_SIZE];
-	va_list va;
-
-	va_start(va, message);
-	vsnprintf(buf, BUF_SIZE, message, va);
-	va_end(va);
-
-	printf("WARNING: %s\n", buf);
-}
-
-void timestamp(char *buf, size_t buflen) {
-	time_t tm = time(NULL);
-	strftime(buf, buflen, "%c", localtime(&tm));
-}
-

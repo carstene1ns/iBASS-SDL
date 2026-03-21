@@ -6,3 +6,5 @@ provided in 2009 by Revolution Software.
 
 This is based on their source, with an own "System" implementation based on
 SDL2, without the sorrounding iOS app.
+
+![screenshot](res/screenshot.png)

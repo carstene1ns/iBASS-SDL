@@ -20,8 +20,6 @@
 #include "sky/music.h"
 #include "sky/sky.h"
 
-#include "iphone_common.h"
-
 namespace Sky {
 
 Music::Music(OSystem *system) : _section(0), _currentMusic(0) {

@@ -39,8 +39,6 @@
 #include "sky/text.h"
 #include "sky/compact.h"
 
-#include "iphone_common.h"
-
 namespace Sky {
 
 	extern "C"	bool	isUSA();//tony28july09

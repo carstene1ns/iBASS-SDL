@@ -33,9 +33,6 @@
 
 #include "system/common.h"
 
-#define		debug(a, ...)		(void)0;
-
-
 typedef 	signed char 	int8;
 typedef 	unsigned char 	uint8;
 typedef		unsigned char	byte;

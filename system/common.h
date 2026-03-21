@@ -29,7 +29,7 @@ enum Error {
 }
 
 void error(const char *message, ...);
-//void debug(int level, const char *message, ...);
+void debug(int level, const char *message, ...);
 void warning(const char *message, ...);
 
 void timestamp(char *buf, size_t buflen);
