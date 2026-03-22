@@ -45,7 +45,7 @@ void Music::loadSection(int section) {
 	_section = section;
 }
 
-void Music::playMusic(int song, bool forcePlay) {
+void Music::startMusic(int song, bool forcePlay) {
 	song &= 0xF;
 
 	if ((song == _currentMusic) && !forcePlay)
@@ -56,7 +56,7 @@ void Music::playMusic(int song, bool forcePlay) {
 	if (0 == song) {
 		_system->stopMusic();
 	} else {
-		_system->playMusic(_section, song);
+		_system->startMusic(_section, song);
 	}
 }
 

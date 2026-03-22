@@ -20,15 +20,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/text.h $
- * $Id: text.h 28966 2007-09-19 08:40:12Z peres001 $
- *
  */
 
 #ifndef SKY_TEXT_H
 #define SKY_TEXT_H
 
-#include "system/common.h"
+
+#include "common/scummsys.h"
 
 namespace Sky {
 
@@ -55,7 +53,7 @@ public:
 	~Text(void);
 	struct DisplayedText displayText(uint32 textNum, uint8 *dest, bool centre, uint16 pixelWidth, uint8 color);
 	struct DisplayedText displayText(char *textPtr, uint8 *dest, bool centre, uint16 pixelWidth, uint8 color);
-	struct DisplayedText lowTextManager(uint32 textNum, uint16 width, uint16 logicNum, uint8 color, bool centre, bool extraDebug);
+	struct DisplayedText lowTextManager(uint32 textNum, uint16 width, uint16 logicNum, uint8 color, bool centre);
 	void fnSetFont(uint32 fontNr);
 	void fnTextModule(uint32 textInfoId, uint32 textNo);
 	void fnPointerText(uint32 pointedId, uint16 mouseX, uint16 mouseY);
@@ -66,7 +64,7 @@ public:
 	char * giveTextBuffer(){return &_textBuffer[0];}//tony8april09
 
 	uint32 _numLetters;	//no of chars in message
-	const char *getText(uint32 textNr, bool extraDebug);
+	const char *getText(uint32 textNr);
 
 	void setLanguage(uint16 language);
 

@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "system/types.h"
-#include "system/file.h"
+#include "common/file.h"
 #include "system/othsys.h"
 #include "system/othsys_opengl.h"
 #include "system/savefile.h"

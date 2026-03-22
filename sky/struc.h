@@ -20,9 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/struc.h $
- * $Id: struc.h 27830 2007-07-01 18:18:43Z fingolfin $
- *
  */
 
 #ifndef SKY_STRUC_H
@@ -36,7 +33,8 @@ struct DisplayedText {
 	uint16 compactNum;
 };
 
-#include "sky/pack-start.h"	// START STRUCT PACKING
+
+#include "common/pack-start.h"	// START STRUCT PACKING
 
 struct DataFileHeader {
 	uint16 flag; // bit 0: set for colour data, clear for not
@@ -162,10 +160,9 @@ struct Compact {
 	MegaSet megaSet1;	 //
 	MegaSet megaSet2;	 //
 	MegaSet megaSet3;	 //
-
 } PACKED_STRUCT;
 
-#include "sky/pack-end.h"	// END STRUCT PACKING
+#include "common/pack-end.h"	// END STRUCT PACKING
 
 } // End of namespace Sky
 

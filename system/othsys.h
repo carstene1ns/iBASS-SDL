@@ -74,7 +74,7 @@ public:
 	virtual void delayMillis(uint32 msecs) = 0;
 
 	//audio methods
-	virtual void playMusic(int section, int song) = 0;
+	virtual void startMusic(int section, int song) = 0;
 	virtual void stopMusic(void) = 0;
 	virtual bool isMusicPlaying(void) const = 0;
 	virtual void setMusicVolume(float volume) = 0;

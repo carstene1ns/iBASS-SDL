@@ -22,6 +22,12 @@ find_package(SDL2_mixer REQUIRED)
 find_package(ZLIB REQUIRED)
 
 add_executable(sdlBASS
+	common/file.cpp
+	common/file.h
+	common/pack-end.h
+	common/pack-start.h
+	common/scummsys.h
+	common/system.h
 	iBASS_fake.cpp
 	main.cpp
 	sky/autoroute.cpp
@@ -40,8 +46,6 @@ add_executable(sdlBASS
 	sky/mouse.h
 	sky/music.cpp
 	sky/music.h
-	sky/pack-end.h
-	sky/pack-start.h
 	sky/saveload.cpp
 	sky/saveload.h
 	sky/screen.cpp
@@ -57,8 +61,6 @@ add_executable(sdlBASS
 	system/caffile.cpp
 	system/common.cpp
 	system/common.h
-	system/file.cpp
-	system/file.h
 	system/ima4.cpp
 	system/othsys.h
 	system/othsys_sdl.cpp

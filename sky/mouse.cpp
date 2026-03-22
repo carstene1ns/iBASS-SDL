@@ -20,13 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/mouse.cpp $
- * $Id: mouse.cpp 36304 2009-02-13 16:55:16Z joostp $
- *
  */
 
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/othsys.h"
 
 #include "sky/disk.h"
@@ -36,7 +33,6 @@
 #include "sky/skydefs.h"
 #include "sky/struc.h"
 #include "sky/compact.h"
-#include "sky/text.h"
 #include "sky/saveload.h"
 
 
@@ -48,7 +44,7 @@ namespace Sky {
 extern "C"	void CPP_startControlPanel();
 extern "C"	void CPP_startHelpPanel();
 extern "C"	void CPP_sendTweet(int which);
-extern "C"	void CPP_newGameAlert(bool	on);
+extern "C"	void CPP_newGameAlert(bool on);
 
 #define MICE_FILE	60300
 #define NO_MAIN_OBJECTS	24
@@ -104,12 +100,10 @@ uint32 Mouse::_mouseLincObjects[21] = {
 	24830,
 	24829
 };
-//----------------------------------------------------------------------------------------------------------------------------------
 
-Mouse::Mouse(OSystem *system, Disk *skyDisk, SkyCompact *skyCompact, Text *t ) {
+Mouse::Mouse(OSystem *system, Disk *skyDisk, SkyCompact *skyCompact) {
 	_skyDisk = skyDisk;
 	_skyCompact = skyCompact;
-	_skyText = t;
 	_system = system;
 	_mouseB = 0;
 	_currentCursor = 6;
@@ -123,6 +117,7 @@ Mouse::Mouse(OSystem *system, Disk *skyDisk, SkyCompact *skyCompact, Text *t ) {
 
 	resetUI();
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 void	Mouse::resetUI()//tony21july09
 {
@@ -144,32 +139,27 @@ void	Mouse::resetUI()//tony21july09
 
 	//printf("ResetUI\n");
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 Mouse::~Mouse( ){
 	free (_miceData);
 	free (_objectMouseData);
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::replaceMouseCursors(uint16 fileNo) {
 	free(_objectMouseData);
 	_objectMouseData = _skyDisk->loadFile(fileNo);
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
-bool Mouse::fnAddHuman(void)
-{
+bool Mouse::fnAddHuman(void) {
 	//reintroduce the mouse so that the human can control the player
 	//could still be switched out at high-level
 
 
-	//make player release touch when UI returns - stops clicks after speech registering
+	//iBASS: make player release touch when UI returns - stops clicks after speech registering
 	if (m_mode==Gameplay)
 		m_mode=MustRelease;
 
-	if (!Logic::_scriptVariables[MOUSE_STOP])
-	{
+	if (!Logic::_scriptVariables[MOUSE_STOP]) {
 		Logic::_scriptVariables[MOUSE_STATUS] |= 6;	//cursor & mouse
 
 		if (_mouseY < 2) //stop mouse activating top line
@@ -190,7 +180,7 @@ bool Mouse::fnAddHuman(void)
 		Logic::_scriptVariables[SPECIAL_ITEM] = 0xFFFFFFFF;
 		Logic::_scriptVariables[GET_OFF] = RESET_MOUSE;
 
-
+                // iBASS
 		//printf("TWITTER check\n");
 		for	(int j=0;j<TWITTER_total_actions;j++)
 		{
@@ -249,29 +239,23 @@ bool Mouse::fnAddHuman(void)
 
 	return true;
 }
-//----------------------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::fnSaveCoods(void) {
 	Logic::_scriptVariables[SAFEX] = _mouseX + TOP_LEFT_X;
 	Logic::_scriptVariables[SAFEY] = _mouseY + TOP_LEFT_Y;
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::lockMouse(void) {
 	SkyEngine::_systemVars.systemFlags |= SF_MOUSE_LOCKED;
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::unlockMouse(void) {
 	SkyEngine::_systemVars.systemFlags &= ~SF_MOUSE_LOCKED;
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::restoreMouseData(uint16 frameNum) {
 	warning("Stub: Mouse::restoreMouseData");
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::drawNewMouse() {
 	warning("Stub: Mouse::drawNewMouse");
@@ -279,9 +263,8 @@ void Mouse::drawNewMouse() {
 	//saveMouseData();
 	//drawMouse();
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
-
+// TODO: add eventmanager
 void Mouse::waitMouseNotPressed(int minDelay) {
 	bool mousePressed = true;
 	uint32 now = _system->getMillis();
@@ -314,10 +297,10 @@ void Mouse::waitMouseNotPressed(int minDelay) {
 		_system->delayMillis(20);
 	}
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 //set the mouse, called when it changes - coords make no difference :)
-void Mouse::spriteMouse(uint16 frameNum, uint8 mouseX, uint8 mouseY)
-{
+void Mouse::spriteMouse(uint16 frameNum, uint8 mouseX, uint8 mouseY) {
 	//printf("spriteMouse [%d]\n",frameNum);
 
 	//hotspot an exit?
@@ -330,8 +313,8 @@ void Mouse::spriteMouse(uint16 frameNum, uint8 mouseX, uint8 mouseY)
 	newCursor += ((DataFileHeader *)_miceData)->s_sp_size * frameNum;
 	newCursor += sizeof(DataFileHeader);
 
-//	uint16 mouseWidth = ((DataFileHeader *)_miceData)->s_width;
-//	uint16 mouseHeight = ((DataFileHeader *)_miceData)->s_height;
+//	uint16 mouseWidth = ((dataFileHeader *)_miceData)->s_width;
+//	uint16 mouseHeight = ((dataFileHeader *)_miceData)->s_height;
 
 	//_system->setDragIconFromGameData(newCursor, mouseWidth, mouseHeight, mouseX, mouseY/*, 0*/);
 }
@@ -343,6 +326,7 @@ bool Mouse::IsUILive()//tony7may09
 
 	return false;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 void	Mouse::KillUI()//tony11june09
 {
@@ -573,9 +557,6 @@ void Mouse::TextChooser(uint16 xPos, uint16 yPos)//tony29april09
 void Mouse::InvUseOn(uint16 xPos, uint16 yPos)//tony26april09
 {
 //dragging inv object around the screen - release to use
-
-
-
 
 //	uint32 currentListNum = Logic::_scriptVariables[MOUSE_LIST_NO];
 //	uint16 *currentList;
@@ -899,6 +880,7 @@ bool Mouse::hasSingleInteractIcon(uint32	id)//tony9july09
 
 	return	false;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 uint16	Mouse::giveXcood(Compact *itemData, uint32 id)//tony12july09
 {
@@ -1006,6 +988,7 @@ uint16	Mouse::giveXcood(Compact *itemData, uint32 id)//tony12july09
 
 	return	mid;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 uint16	Mouse::giveYcood(Compact *itemData, uint32 id)//tony12july09
 {
@@ -1234,6 +1217,7 @@ uint16	Mouse::giveYcood(Compact *itemData, uint32 id)//tony12july09
 
 	return	mid;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 int Mouse::doProximityHighlights(uint16 xPos, uint16 yPos)//tony10july09
 {
@@ -1318,6 +1302,7 @@ int Mouse::doProximityHighlights(uint16 xPos, uint16 yPos)//tony10july09
 
 	return	nearestId;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 int Mouse::touchingFloor(uint16 xPos, uint16 yPos)//tony3aug09
 {
@@ -1901,7 +1886,6 @@ void Mouse::pointerEngine(uint16 xPos, uint16 yPos)
 	}
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------
 void Mouse::initExitIcon(uint32 type, int	iconx, int	icony)//tony31july09
@@ -1914,6 +1898,7 @@ void Mouse::initExitIcon(uint32 type, int	iconx, int	icony)//tony31july09
 		case MOUSE_DOWN:	{_actionFlashIcon=UI_ICON_DOWN;_actionFlashX=iconx+5;_system->setIcon(UI_ICON_DOWN, iconx+5, icony);break;}
 	}
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 void Mouse::updateHotspotCoordinate(uint16 xPos)//tony10july09
 {
@@ -1971,16 +1956,13 @@ void Mouse::updateHotspotCoordinate(uint16 xPos)//tony10july09
 
 	}
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
-void Mouse::buttonPressed(uint8 button)
-{
+//----------------------------------------------------------------------------------------------------------------------------------
+void Mouse::buttonPressed(uint8 button) {
 	_mouseB = button;
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
-void Mouse::mouseMoved(uint16 mouseX, uint16 mouseY)
-{
+void Mouse::mouseMoved(uint16 mouseX, uint16 mouseY) {
 	_mouseX = mouseX;
 	_mouseY = mouseY;
 
@@ -2010,6 +1992,7 @@ void Mouse::mouseMoved(uint16 mouseX, uint16 mouseY)
 		_mouseYOff=HOTSPOT_useon_yoff;
 	}
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 uint16	Mouse::givePointerTextX()//tony1may09
 {
@@ -2021,6 +2004,7 @@ uint16	Mouse::givePointerTextY()//tony1may09
 	//set position, for now
 	return 0+TOP_LEFT_Y;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 /*
 void Mouse::buttonEngine1(void)
@@ -2042,12 +2026,10 @@ void Mouse::buttonEngine1(void)
 	}
 }
 */
-//----------------------------------------------------------------------------------------------------------------------------------
 
 void Mouse::resetCursor() {
 	spriteMouse(_currentCursor, 0, 0);
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
 uint16 Mouse::findMouseCursor(uint32 itemNum) {
 	uint8 cnt;
@@ -2065,15 +2047,12 @@ uint16 Mouse::findMouseCursor(uint32 itemNum) {
 }
 //----------------------------------------------------------------------------------------------------------------------------------
 //grab/unGrab inv item
-void Mouse::fnOpenCloseHand(bool open)
-{
-
+void Mouse::fnOpenCloseHand(bool open) {
 //	if (open)	printf("Inv Ungrab\n");
 //	else		printf("Inv grab\n");
 
 	//let go, back to normal?
-	if ((!open) && (!Logic::_scriptVariables[OBJECT_HELD]))
-	{
+	if ((!open) && (!Logic::_scriptVariables[OBJECT_HELD])) {
 		spriteMouse(1, 0, 0);
 		return;
 	}
@@ -2090,19 +2069,16 @@ void Mouse::fnOpenCloseHand(bool open)
 	memcpy(destData, srcData, size);
 	spriteMouse(0, 5, 5);
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
-bool Mouse::wasClicked(void)
-{
+bool Mouse::wasClicked(void) {
 //printf("was clicked\n");
-	if (_logicClick==1)
-	{
+	if (_logicClick==1) {
 		_logicClick++;//stop repeating next time?
 		return true;
-	}
-	else
+	} else
 		return false;
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------
 void Mouse::LincInvMouse(uint16 xPos, uint16 yPos)//tony23april09
 {
@@ -2392,8 +2368,8 @@ void Mouse::LincInvMouse(uint16 xPos, uint16 yPos)//tony23april09
                Logic::_scriptVariables[GET_OFF]=0;
        }
 }
-//----------------------------------------------------------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------------------------------------------------------
 void Mouse::InvMouse(uint16 xPos, uint16 yPos)//tony23april09
 {
        uint32  *obj_list;

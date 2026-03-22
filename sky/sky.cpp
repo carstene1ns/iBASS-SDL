@@ -20,12 +20,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/sky.cpp $
- * $Id: sky.cpp 36318 2009-02-14 00:21:53Z joostp $
- *
  */
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/othsys.h"
 
 #include "sky/disk.h"
@@ -135,7 +132,7 @@ bool SkyEngine::init() {
 
 	_skyCompact = new SkyCompact();
 	_skyText = new Text(_skyDisk, _skyCompact);
-	_skyMouse = new Mouse(_system, _skyDisk, _skyCompact, _skyText);
+	_skyMouse = new Mouse(_system, _skyDisk, _skyCompact);
 	_skyScreen = new Screen(_system, _skyDisk, _skyCompact);
 
 	initVirgin();
@@ -334,6 +331,7 @@ void SkyEngine::gotTimerTick(void) {
 	_skyScreen->handleTimer();
 }
 
+// TODO: eventmanager
 void SkyEngine::delay(int32 amount) {
         Event event;
 
@@ -393,7 +391,6 @@ void SkyEngine::delay(int32 amount) {
 
 }
 
-
 bool SkyEngine::isDemo(void) {
 	switch (_systemVars.gameVersion) {
 	case 109: // pc gamer demo
@@ -406,12 +403,11 @@ bool SkyEngine::isDemo(void) {
 	case 348:
 	case 368:
 	case 372:
-	case 400:
+	case 400: //iBASS
 		return false;
 	default:
 		error("Unknown game version %d", _systemVars.gameVersion);
 	}
-	return false;
 }
 
 bool SkyEngine::isCDVersion(void) {

@@ -185,7 +185,7 @@ bool Logic::fnLookAt(uint32 a, uint32 b, uint32 c)
 //this is inventory left-button look-at
 
 //	printf("fnLookAt\n");
-	DisplayedText textInfo = _skyText->lowTextManager(a, 240, 0, 248, true, false);
+	DisplayedText textInfo = _skyText->lowTextManager(a, 240, 0, 248, true);
 	Compact *textCpt = _skyCompact->fetchCpt(textInfo.compactNum);
 	textCpt->xcood = 168;
 	textCpt->ycood = (uint16)c;

@@ -20,12 +20,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/sound.cpp $
- * $Id: sound.cpp 36304 2009-02-13 16:55:16Z joostp $
- *
  */
 
-#include "system/common.h"
+#include "common/system.h"
 
 #include "sky/disk.h"
 #include "sky/logic.h"
@@ -41,7 +38,7 @@ namespace Sky {
 #define SFXF_START_DELAY 0x80
 #define SFXF_SAVE 0x20
 
-#include "sky/pack-start.h"	// START STRUCT PACKING
+#include "common/pack-start.h"	// START STRUCT PACKING
 
 struct RoomList {
 	uint8 room;
@@ -55,7 +52,7 @@ struct Sfx {
 	RoomList roomList[10];
 } PACKED_STRUCT;
 
-#include "sky/pack-end.h"	// END STRUCT PACKING
+#include "common/pack-end.h"	// END STRUCT PACKING
 
 uint16 Sound::_speechConvertTable[8] = {
 	0,									//;Text numbers to file numbers
@@ -1036,8 +1033,6 @@ static int hashCompFunc(const void *m1, const void *m2) {
 	return (e1->filenum < e2->filenum ? -1 : 1);
 }
 
-
-
 SpeechFileSystem::SpeechFileSystem() : _numFiles(0), _entry(0), _fp(0) {
 	_fp = fopen("./speech.dat", "rb");
 	ASSERT(_fp);
@@ -1110,16 +1105,10 @@ void *SpeechFileSystem::getSpeechFile(uint32 filenum) {
 	return NULL;	//not found
 }
 
-
-
-
-
-
 Sound::Sound(Disk *pDisk, OtherSystem *pSystem, uint8 pVolume) {
 	_skyDisk = pDisk;
 	_system = pSystem;
 	_soundData = NULL;
-
 	_saveSounds[0] = _saveSounds[1] = 0xFFFF;
 	_mainSfxVolume = pVolume;
 	_isPaused = false;
@@ -1206,24 +1195,25 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	if (sampleRate > 11025)
 		sampleRate = 11025;
 	uint32 dataOfs  = READ_BE_UINT16(_sfxInfo + (sound << 3) + 0) << 4;
-	uint32 dataSize = READ_BE_UINT16(_sfxInfo + (sound << 3) + 2);
+	//uint32 dataSize = READ_BE_UINT16(_sfxInfo + (sound << 3) + 2);
 	uint32 dataLoop = READ_BE_UINT16(_sfxInfo + (sound << 3) + 6);
 	dataOfs += _sfxBaseOfs;
 
-//	byte flags = Audio::Mixer::FLAG_UNSIGNED;
+#if 0
+	byte flags = Audio::Mixer::FLAG_UNSIGNED;
 
 	uint32 loopSta = 0, loopEnd = 0;
 	if (dataLoop) {
 		loopSta = dataSize - dataLoop;
 		loopEnd = dataSize;
-//		flags |= Audio::Mixer::FLAG_LOOP;
+		flags |= Audio::Mixer::FLAG_LOOP;
 	}
 
-//	if (channel == 0)
-//		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
-//	else
-//		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
-
+	if (channel == 0)
+		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
+	else
+		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
+#endif
 	_system->playSFX(g_section, sound, channel & 1, (float)volume / 255.0f, dataLoop != 0);
 }
 
@@ -1257,7 +1247,6 @@ void Sound::fnStartFx(uint32 sound, uint8 channel) {
 	//	volume = roomList[i].adlibVolume;
 	//else if (SkyEngine::_systemVars.systemFlags & SF_ROLAND)
 		volume = roomList[i].rolandVolume;
-
 	volume = (volume * _mainSfxVolume) >> 8;
 
 	// Check the flags, the sound may come on after a delay.
@@ -1310,7 +1299,6 @@ void Sound::restoreSfx(void) {
 }
 
 void Sound::fnStopFx(void) {
-
 	_system->stopSFX(0);
 	_system->stopSFX(1);
 
@@ -1325,7 +1313,6 @@ void Sound::stopSpeech(void) {
 bool Sound::startSpeech(uint16 textNum) {
 	if (!(SkyEngine::_systemVars.systemFlags & SF_ALLOW_SPEECH))
 		return false;
-
 	uint16 speechFileNum = _speechConvertTable[textNum >> 12] + (textNum & 0xFFF);
 
 	void *mem = _speechFS->getSpeechFile(speechFileNum + 50000);
@@ -1341,7 +1328,6 @@ bool Sound::startSpeech(uint16 textNum) {
 bool Sound::speechFinished(void) {
 	return !_system->isSpeechPlaying();
 }
-
 
 void Sound::fnPauseFx(void) {
 	if (!_isPaused) {

@@ -20,9 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/skydefs.h $
- * $Id: skydefs.h 34425 2008-09-07 21:38:53Z fingolfin $
- *
  */
 
 #ifndef SKY_DEFS_H

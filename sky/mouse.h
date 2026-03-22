@@ -20,15 +20,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/mouse.h $
- * $Id: mouse.h 28966 2007-09-19 08:40:12Z peres001 $
- *
  */
 
 #ifndef SKY_MOUSE_H
 #define SKY_MOUSE_H
 
-#include "system/common.h"
+
+#include "common/scummsys.h"
 
 class OSystem;
 
@@ -87,13 +85,12 @@ namespace Sky {
 class Disk;
 class Logic;
 class SkyCompact;
-class Text;
 
 class Mouse {
 
 public:
 
-	Mouse(OSystem *system, Disk *skyDisk, SkyCompact *skyCompact, Text *t);
+	Mouse(OSystem *system, Disk *skyDisk, SkyCompact *skyCompact);
 	~Mouse(void);
 
 	void mouseEngine();
@@ -157,9 +154,10 @@ protected:
 
 	uint16 _logicClick;
 
-	uint16	_mouseB;	//mouse button
-	uint16	_mouseX;	//actual mouse coordinates
-	uint16	_mouseY;
+	uint16 _mouseB;	//mouse button
+	uint16 _mouseX;	//actual mouse coordinates
+	uint16 _mouseY;
+
 	int16	_mouseXOff;
 	int16	_mouseYOff;
 	uint16	_timeOn;//how long have we held on this item
@@ -190,10 +188,7 @@ protected:
 	int		_actionFlashX;
 	int		_actionFlashY;
 
-
-
-
-	uint16 _currentCursor;//current mouse type
+	uint16 _currentCursor;
 
 	byte *_miceData;	//address of mouse sprites
 	byte *_objectMouseData;	//address of object mouse sprites
@@ -205,7 +200,6 @@ protected:
 	Disk *_skyDisk;
 	Logic *_skyLogic;
 	SkyCompact *_skyCompact;
-	Text *_skyText;
 
 	enum
 	{

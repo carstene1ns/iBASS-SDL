@@ -767,7 +767,7 @@ void OtherSystem_SDL::loadSFXSection(int section) {
 	}
 }
 
-void OtherSystem_SDL::playMusic(int section, int song) {
+void OtherSystem_SDL::startMusic(int section, int song) {
 	if (8 != section) {
 		_musicSection = section;
 		_musicSong = song;
@@ -922,7 +922,7 @@ void OtherSystem_SDL::pauseAudioForMenu(bool pause, bool playMenuMusic) {
 
 		if (playMenuMusic) {
 			//start menu music
-			playMusic(8, 1);
+			startMusic(8, 1);
 		}
 	} else {
 		if (_effectIsPlaying[0]) Mix_Resume(AUDIO_SFX0);
@@ -930,7 +930,7 @@ void OtherSystem_SDL::pauseAudioForMenu(bool pause, bool playMenuMusic) {
 		if (_speechIsPlaying) Mix_Resume(AUDIO_SPEECH);
 		if (_musicIsPlaying) {
 			//restart music that was playing
-			playMusic(_prevMusicSection, _prevMusicSong);
+			startMusic(_prevMusicSection, _prevMusicSong);
 		} else {
 			//if nothing playing, then at least kill the menu music
 			stopMusic();

@@ -26,7 +26,7 @@
 #ifndef SKY_SAVELOAD_H
 #define SKY_SAVELOAD_H
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/savefile.h"
 
 class OSystem;

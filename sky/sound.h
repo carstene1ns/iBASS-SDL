@@ -20,15 +20,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/sound.h $
- * $Id: sound.h 33570 2008-08-03 10:16:17Z eriktorbjorn $
- *
  */
 
 #ifndef SKY_SOUND_H
 #define SKY_SOUND_H
 
-#include "system/common.h"
+#include "common/scummsys.h"
 #include "system/othsys.h"
 
 namespace Sky {
@@ -94,7 +91,6 @@ public:
 	void fnStartFx(uint32 sound, uint8 channel);
 	bool startSpeech(uint16 textNum);
 	bool speechFinished(void);
-
 	void fnPauseFx(void);
 	void fnUnPauseFx(void);
 	void fnStopFx(void);

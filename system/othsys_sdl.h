@@ -104,7 +104,7 @@ public:
 	void drawMouse(void);
 	void fullTextureUpdate(void);
 
-	virtual void playMusic(int section, int song);
+	virtual void startMusic(int section, int song);
 	virtual void stopMusic(void);
 	virtual bool isMusicPlaying(void) const;
 	virtual void setMusicVolume(float volume);

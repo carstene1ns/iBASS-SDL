@@ -20,16 +20,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/sky.h $
- * $Id: sky.h 39002 2009-03-01 04:30:55Z fingolfin $
- *
  */
 
 #ifndef SKY_H
 #define SKY_H
 
 #include "system/othsys.h"
-#include "sky/struc.h"	//MegaSet
+//#include "sky/struc.h"	//MegaSet
 
 namespace Sky {
 
@@ -57,8 +54,7 @@ class Music;
 class SkyCompact;
 class SaveLoad;
 
-class SkyEngine
-{
+class SkyEngine {
 protected:
 	byte _key_pressed;
 

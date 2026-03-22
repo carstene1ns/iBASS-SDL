@@ -20,14 +20,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/disk.h $
- * $Id: disk.h 30238 2008-01-05 12:45:14Z dreammaster $
- *
  */
 
 #ifndef SKY_DISK_H
 #define SKY_DISK_H
 
+
+#include "common/scummsys.h"
 
 #define MAX_FILES_IN_LIST 60
 

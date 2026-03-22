@@ -4,8 +4,6 @@
  * are too numerous to list here. Please refer to:
  * http://www.scummvm.org/credits/
  *
- * Portions Copyright (C) 2009 Revolution Software Ltd.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -20,15 +18,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/grid.h $
- * $Id: grid.h 28966 2007-09-19 08:40:12Z peres001 $
- *
  */
 
 #ifndef SKY_GRID_H
 #define SKY_GRID_H
 
-#include "system/common.h"
+
+#include "common/scummsys.h"
 #include "skydefs.h"
 
 namespace Sky {

@@ -36,7 +36,7 @@ void error(const char *message, ...) {
 }
 
 void debug(int level, const char *message, ...) {
-	if (level>7) return;
+	if (level>2) return;
 
 	char buf[BUF_SIZE];
 	va_list va;

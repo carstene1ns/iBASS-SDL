@@ -20,15 +20,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/screen.h $
- * $Id: screen.h 30238 2008-01-05 12:45:14Z dreammaster $
  *
  */
 
 #ifndef SKY_SCREEN_H
 #define SKY_SCREEN_H
 
-#include "system/common.h"
+
+#include "common/scummsys.h"
 #include "sky/skydefs.h"
 
 class OSystem;

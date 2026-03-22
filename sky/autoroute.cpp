@@ -4,8 +4,6 @@
  * are too numerous to list here. Please refer to:
  * http://www.scummvm.org/credits/
  *
- * Portions Copyright (C) 2009 Revolution Software Ltd.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -20,8 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/autoroute.cpp $
- * $Id: autoroute.cpp 36304 2009-02-13 16:55:16Z joostp $
  *
  */
 

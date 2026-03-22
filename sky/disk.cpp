@@ -20,14 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/disk.cpp $
- * $Id: disk.cpp 36304 2009-02-13 16:55:16Z joostp $
- *
  */
 
 
-#include "system/common.h"
-#include "system/file.h"
+#include "common/file.h"
 
 #include "sky/disk.h"
 #include "sky/sky.h"
@@ -257,7 +253,45 @@ void Disk::fnFlushBuffers(void) {
 
 
 uint32 Disk::determineGameVersion() {
+	//iBASS
 	return 372;
+
+#if 0
+	//determine game version based on number of entries in dinner table
+	switch (_dinnerTableEntries) {
+	case 243:
+		// pc gamer demo (v0.0109)
+		return 109;
+	case 247:
+		//floppy demo (v0.0267)
+		return 267;
+	case 1404:
+		//floppy (v0.0288)
+		return 288;
+	case 1413:
+		//floppy (v0.0303)
+		return 303;
+	case 1445:
+		//floppy (v0.0331 or v0.0348)
+		if (_dataDiskHandle->size() == 8830435)
+			return 348;
+		else
+			return 331;
+	case 1711:
+		//cd demo (v0.0365)
+		return 365;
+	case 5099:
+		//cd (v0.0368)
+		return 368;
+	case 5097:
+		//cd (v0.0372)
+		return 372;
+	default:
+		//unknown version
+		error("Unknown game version! %d dinner table entries", _dinnerTableEntries);
+		break;
+	}
+#endif
 }
 
 } // End of namespace Sky

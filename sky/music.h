@@ -30,7 +30,7 @@ public:
 	~Music();
 
 	void loadSection(int section);
-	void playMusic(int song, bool forcePlay = false);
+	void startMusic(int song, bool forcePlay = false);
 	void stopMusic(void);
 	int giveCurrentMusic(void) const;
 protected:

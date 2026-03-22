@@ -4,8 +4,6 @@
  * are too numerous to list here. Please refer to:
  * http://www.scummvm.org/credits/
  *
- * Portions Copyright (C) 2009 Revolution Software Ltd.
- *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -20,14 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/compact.cpp $
- * $Id: compact.cpp 36133 2009-01-30 01:15:17Z fingolfin $
- *
  */
 
 
-#include "system/common.h"
-#include "system/file.h"
+#include "common/file.h"
 #include "sky/compact.h"
 //#include "gui/message.h"
 
@@ -316,8 +310,6 @@ uint16 *SkyCompact::getSub(Compact *cpt, uint16 mode) {
 	default:
 		error("Invalid Mode (%d)", mode);
 	}
-
-	return NULL; // CT
 }
 
 uint16 *SkyCompact::getGrafixPtr(Compact *cpt) {
@@ -344,8 +336,6 @@ MegaSet *SkyCompact::getMegaSet(Compact *cpt) {
 	default:
 		error("Invalid MegaSet (%d)", cpt->megaSet);
 	}
-
-	return NULL; // CT
 }
 
 /**
@@ -378,7 +368,6 @@ uint16 *SkyCompact::getTurnTable(Compact *cpt, uint16 dir) {
 	default:
 		error("No TurnTable (%d) in MegaSet (%d)", dir, cpt->megaSet);
 	}
-	return 0;
 }
 
 void *SkyCompact::getCompactElem(Compact *cpt, uint16 off) {
@@ -419,7 +408,6 @@ void *SkyCompact::getCompactElem(Compact *cpt, uint16 off) {
 	off -= TURNTABLE_SIZE;
 
 	error("Offset %X out of bounds of compact", (int)(off + COMPACT_SIZE + 4 * MEGASET_SIZE + 4 * TURNTABLE_SIZE));
-	return 0;
 }
 
 uint8 *SkyCompact::createResetData(uint16 gameVersion) {
@@ -442,7 +430,6 @@ uint8 *SkyCompact::createResetData(uint16 gameVersion) {
 	}
 	free(resetBuf);
 	error("Unable to find reset data for Beneath a Steel Sky Version 0.0%03d", gameVersion);
-	return 0;
 }
 
 // - debugging functions
@@ -461,7 +448,7 @@ uint16 SkyCompact::findCptId(const char *cptName) {
 	for (uint16 listCnt = 0; listCnt < _numDataLists; listCnt++)
 		for (uint16 elemCnt = 0; elemCnt < _dataListLen[listCnt]; elemCnt++)
 			if (_cptNames[listCnt][elemCnt] != 0)
-				if (/*scumm_stricmp*/strcasecmp(cptName, _cptNames[listCnt][elemCnt]) == 0)
+				if (scumm_stricmp(cptName, _cptNames[listCnt][elemCnt]) == 0)
 					return (listCnt << 12) | elemCnt;
 	// not found
 	debug(1, "Id for Compact %s wasn't found", cptName);

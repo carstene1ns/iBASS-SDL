@@ -20,13 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/logic.cpp $
- * $Id: logic.cpp 36149 2009-01-30 16:04:39Z fingolfin $
- *
  */
 
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/othsys.h"
 
 #include "sky/autoroute.h"
@@ -108,7 +105,7 @@ Logic::~Logic(void) {
 
 void Logic::initScreen0(void) {
 	fnEnterSection(0, 0, 0);
-	_skyMusic->playMusic(2);
+	_skyMusic->startMusic(2);
 	SkyEngine::_systemVars.currentMusic = 2;
 }
 
@@ -145,20 +142,15 @@ void Logic::engine()
 
 
 //	printf("Logic %d\n", cycle++);
-	do
-	{
+	do {
 		uint16 *logicList = (uint16 *)_skyCompact->fetchCpt(_scriptVariables[LOGIC_LIST_NO]);
 
-		while (uint16 id = *logicList++)
-		{ // 0 means end of list
-			if (id == 0xffff)
-			{
+		while (uint16 id = *logicList++) { // 0 means end of list
+			if (id == 0xffff) {
 				// Change logic data address
 				logicList = (uint16 *)_skyCompact->fetchCpt(*logicList);
 				continue;
 			}
-
-
 
 			_scriptVariables[CUR_ID] = id;
 			_compact = _skyCompact->fetchCpt(id);
@@ -172,6 +164,7 @@ void Logic::engine()
 			if (_compact->status & (1 << 7))
 				_skyGrid->removeObjectFromWalk(_compact);
 
+			//Debug::logic(_compact->logic);
 			(this->*_logicTable[_compact->logic]) ();
 
 			if (_compact->status & (1 << 7))
@@ -186,8 +179,7 @@ void Logic::engine()
 		// script just asked the user to enter a copy protection code.
 		// this is done to prevent the copy protection screen from flashing up.
 		// (otherwise it would be visible for 1/50 second)
-	}
-	while (checkProtection());
+	} while (checkProtection());
 }
 
 void Logic::nop() {}
@@ -488,15 +480,13 @@ void Logic::turn() {
 	logicScript();
 }
 
-
 //----------------------------------------------------------------------------------------------------
 //updates pointer text, per cycle - NOT the graphical mouse cursor
-void Logic::cursor()
-{
+void Logic::cursor() {
 	//tony says i think this is the PER-CYCLE logic of the textCompact
+	//_skyText->logicCursor(_compact, _skyMouse->giveMouseX(), _skyMouse->giveMouseY());
 	_skyText->logicCursor(_compact, _skyMouse->givePointerTextX(), _skyMouse->givePointerTextY());
 }
-//----------------------------------------------------------------------------------------------------
 
 static uint16 clickTable[46] = {
 	ID_FOSTER,
@@ -705,7 +695,6 @@ void Logic::waitSync() {
 	// use this instead of loops in the script
 
 	//printf("Wait for sync %s\n", _skyText->getText(_compact->cursorText));
-
 	if (!_compact->sync)
 		return;
 
@@ -1233,7 +1222,6 @@ void Logic::initScriptVariables() {
 }
 
 uint16 Logic::mouseScript(uint32 scrNum, Compact *scriptComp) {
-
 	Compact *tmpComp = _compact;
 	_compact = scriptComp;
 	uint16 retVal = script((uint16)(scrNum & 0xFFFF), (uint16)(scrNum >> 16));
@@ -1251,9 +1239,7 @@ uint16 Logic::mouseScript(uint32 scrNum, Compact *scriptComp) {
 	return retVal;
 }
 
-
 #define SCRIPT_OFFS     (offset - moduleStart[scriptNo & 0xFFF])
-
 
 /**
  * This is the actual script engine.  It interprets script \a scriptNo starting at \a offset
@@ -1265,33 +1251,31 @@ uint16 Logic::mouseScript(uint32 scrNum, Compact *scriptComp) {
  *
  * @return 0 if script finished. Else offset where to continue.
  */
-uint16 Logic::script(uint16 scriptNo, uint16 offset)
-{
+uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 script:
 	/// process a script
 	/// low level interface to interpreter
 
 	uint16 moduleNo = scriptNo >> 12;
+	debug(3, "Doing Script %x", (offset << 16) | scriptNo);
 	uint16 *scriptData = _moduleList[moduleNo]; // get module address
 
 	if (!scriptData) { // We need to load the script module
 		_moduleList[moduleNo] = _skyDisk->loadScriptFile(moduleNo + F_MODULE_0);
 		 scriptData = _moduleList[moduleNo]; // module has been loaded
 
-		//if just loading mod 1, do the elevator hack
-		 if (moduleNo==1)
-		 {
+		//iBASS: if just loading mod 1, do the elevator hack
+		if (moduleNo==1) {
 			uint16 *scriptDataTemp = scriptData+scriptData[98];
 			*(scriptDataTemp+0x32)=140;
-		 }
+		}
 	}
 
 	uint16 *moduleStart = scriptData;
 
 	//printf("Doing Script: %d:%d:%x\n", moduleNo, scriptNo & 0xFFF, offset ? (offset - moduleStart[scriptNo & 0xFFF]) : 0);
 
-
-	//hack for skipping old end sequence
+	//iBASS: hack for skipping old end sequence
 	if (0 == moduleNo && (scriptNo & 0xFFF) == 74 && offset == 14139) {
 		offset = 14408;
 	}
@@ -1300,10 +1284,9 @@ script:
 	if (offset)
 		scriptData = moduleStart + offset;
 	else
-		scriptData += scriptData[scriptNo & 0x0FFF];
+		scriptData += scriptData[scriptNo & 0x0fff];
 
-
-	//gameplay hacks for iBASS version.
+	//iBASS: gameplay hacks
 	if (!offset) {
 		if ((scriptNo & 0xFFF) == 161 && moduleNo == 1) {
 			//the hobbins transporter pauses
@@ -1311,8 +1294,6 @@ script:
 			*(scriptData+0x65) = 60;
 			*(scriptData+0x72) = 60;
 		}
-
-
 	}
 
 /*		if (!offset && (scriptNo & 0xFFF) == 98 && moduleNo == 1) {
@@ -1327,6 +1308,7 @@ script:
 
 	for (;;) {
 		command = *scriptData++; // get a command
+		//Debug::script(command, scriptData);
 
 		switch (command) {
 		case 0: // push_variable
@@ -1406,7 +1388,9 @@ script:
 				}
 
 				uint16 mcode = *scriptData++ / 4; // get mcode number
+				//Debug::mcode(mcode, a, b, c);
 
+				//iBASS
 				const int scriptNum = (scriptNo & 0xFFF);
 				const int scriptOffs = SCRIPT_OFFS + 2;
 #if 0
@@ -1534,9 +1518,8 @@ bool Logic::fnDrawScreen(uint32 a, uint32 b, uint32 c) {
 	return true;
 }
 
-bool Logic::fnAr(uint32 x, uint32 y, uint32 c)
-{
-//printf("Auto Route\n");
+bool Logic::fnAr(uint32 x, uint32 y, uint32 c) {
+        //printf("Auto Route\n");
 	_compact->downFlag = 1; // assume failure in-case logic is interupted by speech (esp Joey)
 
 	_compact->arTargetX = (uint16)x;
@@ -1619,15 +1602,13 @@ bool Logic::fnCrossMouse(uint32 a, uint32 b, uint32 c) {
 	return true;
 }
 
-bool Logic::fnCursorRight(uint32 a, uint32 b, uint32 c)
-{
+bool Logic::fnCursorRight(uint32 a, uint32 b, uint32 c) {
 //	printf("mouse RIGHT\n");
 	_skyMouse->spriteMouse(MOUSE_RIGHT, 9, 4);
 	return true;
 }
 
-bool Logic::fnCursorLeft(uint32 a, uint32 b, uint32 c)
-{
+bool Logic::fnCursorLeft(uint32 a, uint32 b, uint32 c) {
 //	printf("mouse LEFT\n");
 	_skyMouse->spriteMouse(MOUSE_LEFT, 0, 5);
 	return true;
@@ -1752,7 +1733,17 @@ bool Logic::fnKillId(uint32 id, uint32 b, uint32 c) {
 	return true;
 }
 
+bool Logic::fnNoHuman(uint32 a, uint32 b, uint32 c) {
+	if (!_scriptVariables[MOUSE_STOP]) {
+		_scriptVariables[MOUSE_STATUS] &= 1;
+		runGetOff();
+		fnBlankMouse(0, 0, 0);
 
+		//iBASS: shut down the hotspots and so on when control removed
+		_skyMouse->KillUI();
+	}
+	return true;
+}
 
 bool Logic::fnAddHuman(uint32 a, uint32 b, uint32 c) {
 	return _skyMouse->fnAddHuman();
@@ -1778,14 +1769,14 @@ bool Logic::fnClearStop(uint32 a, uint32 b, uint32 c) {
 	_scriptVariables[MOUSE_STOP] = 0;
 	return true;
 }
+
 //------------------------------------------------------------------------------------------------------------------
-bool Logic::fnPointerText(uint32 a, uint32 b, uint32 c)
-{
+bool Logic::fnPointerText(uint32 a, uint32 b, uint32 c) {
 	//printf("Pointer text\n");
+	//_skyText->fnPointerText(a, _skyMouse->giveMouseX(), _skyMouse->giveMouseY());
 	_skyText->fnPointerText(a, _skyMouse->givePointerTextX(), _skyMouse->givePointerTextY());
 	return true;
 }
-//------------------------------------------------------------------------------------------------------------------
 
 bool Logic::fnQuit(uint32 a, uint32 b, uint32 c) {
 	return false;
@@ -1801,25 +1792,10 @@ bool Logic::fnSpeakMe(uint32 targetId, uint32 mesgNum, uint32 animNum) {
 		return false;
 	}
 
-
 	stdSpeak(_skyCompact->fetchCpt(targetId), mesgNum, animNum, 0);
 	return false;	//drop out of script
 }
 
-//------------------------------------------------------------------------------------------------------------------
-bool Logic::fnNoHuman(uint32 a, uint32 b, uint32 c)
-{
-	if (!_scriptVariables[MOUSE_STOP]) {
-		_scriptVariables[MOUSE_STATUS] &= 1;
-		runGetOff();
-		fnBlankMouse(0, 0, 0);
-
-		//added for iBASS to shut down the hotspots and so on when control removed
-		_skyMouse->KillUI();
-	}
-	return true;
-}
-//------------------------------------------------------------------------------------------------------------------
 bool Logic::fnSpeakMeDir(uint32 targetId, uint32 mesgNum, uint32 animNum) {
 	//must be player so don't cause script to drop out
 	//this function sets the directional option whereby
@@ -1860,8 +1836,8 @@ bool Logic::fnSpeakWaitDir(uint32 a, uint32 b, uint32 c) {
 
 	return false;
 }
-//------------------------------------------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------------------------------------------
 bool Logic::fnChooser(uint32 a, uint32 b, uint32 c) {
 
 	// setup the text questions to be clicked on
@@ -1879,7 +1855,7 @@ bool Logic::fnChooser(uint32 a, uint32 b, uint32 c) {
 	while (*p) {
 		uint32 textNum = *p++;
 
-		DisplayedText lowText = _skyText->lowTextManager(textNum, GAME_SCREEN_WIDTH, 0, 241, 0, false);
+		DisplayedText lowText = _skyText->lowTextManager(textNum, GAME_SCREEN_WIDTH, 0, 241, false);
 
 		uint8 *data = lowText.textData;
 
@@ -1916,7 +1892,7 @@ bool Logic::fnChooser(uint32 a, uint32 b, uint32 c) {
 	if (p == _scriptVariables + TEXT1)
 		return true;
 
-	//special ui mode
+	//iBASS: special ui mode
 	_skyMouse->setTextChooserMode();
 
 	_compact->logic = L_CHOOSE; // player frozen until choice made
@@ -1924,7 +1900,6 @@ bool Logic::fnChooser(uint32 a, uint32 b, uint32 c) {
 
 	return false;
 }
-//------------------------------------------------------------------------------------------------------------------
 
 bool Logic::fnHighlight(uint32 itemNo, uint32 pen, uint32 c) {
 	pen -= 11;
@@ -1935,7 +1910,6 @@ bool Logic::fnHighlight(uint32 itemNo, uint32 pen, uint32 c) {
 	_skyText->changeTextSpriteColour(sprData, (uint8)pen);
 	return true;
 }
-//------------------------------------------------------------------------------------------------------------------
 
 bool Logic::fnTextKill(uint32 a, uint32 b, uint32 c) {
 	/// Kill of text items that are mouse detectable
@@ -1950,7 +1924,6 @@ bool Logic::fnTextKill(uint32 a, uint32 b, uint32 c) {
 	}
 	return true;
 }
-//------------------------------------------------------------------------------------------------------------------
 
 bool Logic::fnStopMode(uint32 a, uint32 b, uint32 c) {
 	_compact->logic = L_STOPPED;
@@ -1969,9 +1942,7 @@ bool Logic::fnWeWait(uint32 id, uint32 b, uint32 c) {
 bool Logic::fnSendSync(uint32 mega, uint32 sync, uint32 c) {
 	Compact *cpt = _skyCompact->fetchCpt(mega);
 	cpt->sync = (uint16)(sync & 0xffff);
-
 //	printf("fnSendSYNC %d %d\n",mega, sync);
-
 	return false;
 }
 
@@ -2009,11 +1980,10 @@ bool Logic::fnCheckRequest(uint32 a, uint32 b, uint32 c) {
 	return false; // drop from script
 }
 
+//iBASS: bool Logic::fnStartMenu in inventory.cpp
 
-bool Logic::fnUnhighlight(uint32 item, uint32 b, uint32 c)
-{
+bool Logic::fnUnhighlight(uint32 item, uint32 b, uint32 c) {
 	printf("fnUnhighlight\n");
-
 	Compact *cpt = _skyCompact->fetchCpt(item);
 	cpt->frame--;
 	cpt->getToFlag = 0;
@@ -2169,10 +2139,8 @@ bool Logic::fnRunFrames(uint32 sequenceNo, uint32 b, uint32 c) {
 	return false;
 }
 
-bool Logic::fnAwaitSync(uint32 a, uint32 b, uint32 c)
-{
+bool Logic::fnAwaitSync(uint32 a, uint32 b, uint32 c) {
 //	printf("WAIT FOR SYNC=================\n"/*,_skyText->getText(_compact->cursorText)*/);
-
 	if (_compact->sync)
 		return true;
 
@@ -2257,14 +2225,12 @@ bool Logic::fnMouseOff(uint32 a, uint32 b, uint32 c) {
 }
 
 bool Logic::fnFetchX(uint32 id, uint32 b, uint32 c) {
-
 	Compact *cpt = _skyCompact->fetchCpt(id);
 	_scriptVariables[RESULT] = cpt->xcood;
 	return true;
 }
 
 bool Logic::fnFetchY(uint32 id, uint32 b, uint32 c) {
-
 	Compact *cpt = _skyCompact->fetchCpt(id);
 	_scriptVariables[RESULT] = cpt->ycood;
 	return true;
@@ -2369,6 +2335,8 @@ bool Logic::fnEyeball(uint32 id, uint32 b, uint32 c) {
 }
 
 bool Logic::fnLeaveSection(uint32 sectionNo, uint32 b, uint32 c) {
+	//if (SkyEngine::isDemo())
+	//	_skyControl->showGameQuitMsg();
 
 	if (sectionNo == 5) //linc section - has different mouse icons
 		_skyMouse->replaceMouseCursors(60301);
@@ -2377,6 +2345,9 @@ bool Logic::fnLeaveSection(uint32 sectionNo, uint32 b, uint32 c) {
 }
 
 bool Logic::fnEnterSection(uint32 sectionNo, uint32 b, uint32 c) {
+
+	//if (SkyEngine::isDemo() && (sectionNo > 2))
+	//	_skyControl->showGameQuitMsg();
 
 	_scriptVariables[CUR_SECTION] = sectionNo;
 	SkyEngine::_systemVars.currentMusic = 0;
@@ -2398,10 +2369,12 @@ bool Logic::fnEnterSection(uint32 sectionNo, uint32 b, uint32 c) {
 }
 
 bool Logic::fnRestoreGame(uint32 a, uint32 b, uint32 c) {
+	//_skyControl->doLoadSavePanel();
 	return false;
 }
 
 bool Logic::fnRestartGame(uint32 a, uint32 b, uint32 c) {
+	//_skyControl->restartGame();
 	return false;
 }
 
@@ -2431,7 +2404,7 @@ bool Logic::fnBlankScreen(uint32 a, uint32 b, uint32 c) {
 }
 
 bool Logic::fnPrintCredit(uint32 a, uint32 b, uint32 c) {
-	DisplayedText creditText = _skyText->lowTextManager(a, 240, 0, 248, true, false);
+	DisplayedText creditText = _skyText->lowTextManager(a, 240, 0, 248, true);
 	Compact *credCompact = _skyCompact->fetchCpt(creditText.compactNum);
 	credCompact->xcood = 168;
 	if ((a == 558) && (c == 215))
@@ -2441,8 +2414,8 @@ bool Logic::fnPrintCredit(uint32 a, uint32 b, uint32 c) {
 	_scriptVariables[RESULT] = creditText.compactNum;
 	return true;
 }
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------
+
+//iBASS: bool Logic::fnLookAt in inventory.cpp
 
 bool Logic::fnLincTextModule(uint32 textPos, uint32 textNo, uint32 buttonAction) {
 	uint16 cnt;
@@ -2453,7 +2426,7 @@ bool Logic::fnLincTextModule(uint32 textPos, uint32 textNo, uint32 buttonAction)
 	if (buttonAction < 10)
 		_scriptVariables[LINC_DIGIT_0 + buttonAction] = textNo;
 
-	DisplayedText text = _skyText->lowTextManager(textNo, 220, 0, 215, false, false);
+	DisplayedText text = _skyText->lowTextManager(textNo, 220, 0, 215, false);
 
 	Compact *textCpt = _skyCompact->fetchCpt(text.compactNum);
 
@@ -2498,14 +2471,13 @@ bool Logic::fnStopFx(uint32 a, uint32 b, uint32 c) {
 
 bool Logic::fnStartMusic(uint32 a, uint32 b, uint32 c) {
 	if (!(SkyEngine::_systemVars.systemFlags & SF_MUS_OFF))
-		_skyMusic->playMusic((uint16)a);
+		_skyMusic->startMusic((uint16)a);
 	SkyEngine::_systemVars.currentMusic = (uint16)a;
 	return true;
 }
 
 bool Logic::fnStopMusic(uint32 a, uint32 b, uint32 c) {
-	//_skyMusic->playMusic(0);
-	_skyMusic->stopMusic();
+	_skyMusic->startMusic(0);
 	SkyEngine::_systemVars.currentMusic = 0;
 	return true;
 }
@@ -2522,6 +2494,7 @@ bool Logic::fnFadeUp(uint32 a, uint32 b, uint32 c) {
 }
 
 bool Logic::fnQuitToDos(uint32 a, uint32 b, uint32 c) {
+	//Engine::quitGame();
 	return false;
 }
 
@@ -2570,10 +2543,8 @@ void Logic::stdSpeak(Compact *target, uint32 textNum, uint32 animNum, uint32 bas
 		// form the text sprite, if player wants subtitles or
 		// if we couldn't find the speech file
 		DisplayedText textInfo;
-		textInfo = _skyText->lowTextManager(textNum, FIXED_TEXT_WIDTH, 0, (uint8)target->spColour, true, false);
-
+		textInfo = _skyText->lowTextManager(textNum, FIXED_TEXT_WIDTH, 0, (uint8)target->spColour, true);
 		//printf("Speak [%s]\n", _skyText->giveTextBuffer());
-
 		Compact *textCompact = _skyCompact->fetchCpt(textInfo.compactNum);
 		target->spTextId = textInfo.compactNum;	//So we know what text to kill
 		byte *textGfx = textInfo.textData;

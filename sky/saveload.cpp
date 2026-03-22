@@ -23,8 +23,8 @@
  *
  */
 
-#include "system/common.h"
-#include "system/file.h"
+#include "common/system.h"
+#include "common/file.h"
 #include "sky/compact.h"
 #include "sky/saveload.h"
 #include "sky/disk.h"
@@ -707,7 +707,7 @@ uint16 SaveLoad::parseSaveData(uint8 *srcBuf) {
 	_skyDisk->refreshFilesList(reloadList);
 	SkyEngine::_systemVars.currentMusic = (uint16)music;
 	if (!(SkyEngine::_systemVars.systemFlags & SF_MUS_OFF))
-		_skyMusic->playMusic((uint16)music, true);
+		_skyMusic->startMusic((uint16)music, true);
 	//_savedMouse = (uint16)mouseType;
 	_skyMouse->spriteMouse((uint16)mouseType, 0, 0);
 	_skyText->fnSetFont(savedCharSet);

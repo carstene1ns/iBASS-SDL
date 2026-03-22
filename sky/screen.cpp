@@ -20,13 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/screen.cpp $
- * $Id: screen.cpp 36304 2009-02-13 16:55:16Z joostp $
- *
  */
 
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/othsys.h"
 
 #include "sky/disk.h"
@@ -107,6 +104,8 @@ void Screen::clearScreen(void) {
 }
 
 void Screen::setFocusRectangle(const Common::Rect& rect) {
+	//iBASS
+	//_system->setFocusRectangle(rect);
 }
 
 //set a new palette, pal is a pointer to dos vga rgb components 0..63
@@ -153,21 +152,17 @@ void Screen::showScreen(uint16 fileNum) {
 	// This is only used for static images in the floppy and cd intro
 	if (_currentScreen)
 		free(_currentScreen);
-
-	//seems we have to do this!
 	_currentScreen = _skyDisk->loadFile(fileNum);
-
-
 	// make sure the last 8 lines are forced to black.
 	memset(_currentScreen + GAME_SCREEN_HEIGHT * GAME_SCREEN_WIDTH, 0, (FULL_SCREEN_HEIGHT - GAME_SCREEN_HEIGHT) * GAME_SCREEN_WIDTH);
 
-/*	We soo don't want to see a Virgin Games logo - tony May 09
+	//iBASS: We soo don't want to see a Virgin Games logo - tony May 09
+        return;
 
 	if (_currentScreen)
 		showScreen(_currentScreen);
 	else
 		warning("Screen::showScreen: can't load file nr. %d",fileNum);
-*/
 }
 
 void Screen::showScreen(uint8 *pScreen) {
@@ -190,9 +185,6 @@ void Screen::recreate(void) {
 	// check the game grid for changed blocks
 	if (!Logic::_scriptVariables[LAYER_0_ID])
 		return;
-
-
-
 	uint8 *gridPos = _gameGrid;
 	uint8 *screenData = (uint8 *)SkyEngine::fetchItem(Logic::_scriptVariables[LAYER_0_ID]);
 	if (!screenData) {
@@ -249,7 +241,7 @@ void Screen::flip(bool doUpdate) {
 void Screen::fnDrawScreen(uint32 palette, uint32 scroll) {
 	// set up the new screen
 
-	//remove headup UI items
+	//iBASS: remove headup UI items
 	_system->clearAllProximityIcons(false);
 	_system->clearAllIcons(false);
 
@@ -258,7 +250,7 @@ void Screen::fnDrawScreen(uint32 palette, uint32 scroll) {
 	recreate();
 	spriteEngine();
 	flip(false);
-	//dont fade up the death screen
+	//iBASS: dont fade up the death screen
 	if	(Logic::_scriptVariables[SCREEN]!=102)
 		fnFadeUp(palette, scroll);
 }
@@ -394,6 +386,7 @@ void Screen::fnFadeUp(uint32 palNum, uint32 scroll) {
 	}
 }
 
+// TODO: eventmanager
 void Screen::waitForTimer(void) {
 	_gotTick = false;
         while (!_gotTick) {
@@ -598,14 +591,11 @@ void Screen::sortSprites(void) {
 	}
 }
 
-void Screen::doSprites(uint8 layer)
-{
+void Screen::doSprites(uint8 layer) {
 	uint16 drawListNum = DRAW_LIST_NO;
 	uint32 idNum;
 	uint16* drawList;
-
-	while (Logic::_scriptVariables[drawListNum])
-	{ // std sp loop
+	while (Logic::_scriptVariables[drawListNum]) { // std sp loop
 		idNum = Logic::_scriptVariables[drawListNum];
 		drawListNum++;
 
@@ -613,25 +603,20 @@ void Screen::doSprites(uint8 layer)
 
 		//printf("list %d id=%d\n", drawListNum, idNum);
 
-		while (drawList[0])
-		{
+		while (drawList[0]) {
 			// new_draw_list:
-			while ((drawList[0] != 0) && (drawList[0] != 0xFFFF))
-			{
+			while ((drawList[0] != 0) && (drawList[0] != 0xFFFF)) {
 				// back_loop:
 				// not_new_list
 				Compact *spriteData = _skyCompact->fetchCpt(drawList[0]);
 				drawList++;
-				if ((spriteData->status & (1 << layer)) && (spriteData->screen == Logic::_scriptVariables[SCREEN]))
-				{
+				if ((spriteData->status & (1 << layer)) &&
+						(spriteData->screen == Logic::_scriptVariables[SCREEN])) {
 					uint8 *toBeDrawn = (uint8 *)SkyEngine::fetchItem(spriteData->frame >> 6);
-					if (!toBeDrawn)
-					{
+					if (!toBeDrawn) {
 						debug(9, "Spritedata %d not loaded", spriteData->frame >> 6);
 						spriteData->status = 0;
-					}
-					else
-					{
+					} else {
 						drawSprite(toBeDrawn, spriteData);
 						if (layer == BACK)
 							verticalMask();
@@ -645,7 +630,7 @@ void Screen::doSprites(uint8 layer)
 			while (drawList[0] == 0xFFFF)
 				drawList = (uint16 *)_skyCompact->fetchCpt(drawList[1]);
 		}
-	}//outer While
+	}
 }
 
 void Screen::drawSprite(uint8 *spriteInfo, Compact *sprCompact) {

@@ -28,12 +28,14 @@ enum Error {
 };
 }
 
-void error(const char *message, ...);
-void debug(int level, const char *message, ...);
-void warning(const char *message, ...);
+[[noreturn]] void error(const char *message, ...) [[gnu::format(printf, 1, 2)]];
+void debug(int level, const char *message, ...) [[gnu::format(printf, 2, 3)]];
+void warning(const char *message, ...) [[gnu::format(printf, 1, 2)]];
 
 void timestamp(char *buf, size_t buflen);
 
 #define PACKED_STRUCT __attribute__((packed))
+
+#define scumm_stricmp strcasecmp
 
 #endif

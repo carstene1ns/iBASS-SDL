@@ -20,13 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/text.cpp $
- * $Id: text.cpp 36304 2009-02-13 16:55:16Z joostp $
- *
  */
 
 
-#include "system/common.h"
+#include "common/system.h"
 
 #include "sky/disk.h"
 #include "sky/logic.h"
@@ -91,9 +88,9 @@ Text::~Text(void) {
 	if (_linkCharacterSet.addr)
 		free(_linkCharacterSet.addr);
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
+
 void Text::fnSetFont(uint32 fontNr) {
-	charSet *newCharSet = &_mainCharacterSet;
+	charSet *newCharSet;
 
 	switch (fontNr) {
 	case 0:
@@ -114,13 +111,11 @@ void Text::fnSetFont(uint32 fontNr) {
 	_charHeight = (byte)newCharSet->charHeight;
 	_dtCharSpacing = newCharSet->charSpacing;
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
-void Text::fnTextModule(uint32 textInfoId, uint32 textNo)
-{
 
+void Text::fnTextModule(uint32 textInfoId, uint32 textNo) {
 	fnSetFont(1);
 	uint16* msgData = (uint16 *)_skyCompact->fetchCpt(textInfoId);
-	DisplayedText textId = lowTextManager(textNo, msgData[1], msgData[2], 209, false, false);
+	DisplayedText textId = lowTextManager(textNo, msgData[1], msgData[2], 209, false);
 	Logic::_scriptVariables[RESULT] = textId.compactNum;
 	Compact *textCompact = _skyCompact->fetchCpt(textId.compactNum);
 	textCompact->xcood = msgData[3];
@@ -128,15 +123,9 @@ void Text::fnTextModule(uint32 textInfoId, uint32 textNo)
 	fnSetFont(0);
 }
 
-
-
 //----------------------------------------------------------------------------------------------------------------------------------------
 //unpack the actual ascii
-const char *Text::getText(uint32 textNr, bool extraDebug)
-{ //load text #"textNr" into textBuffer
-
-	uint32 textNum=textNr;
-
+const char *Text::getText(uint32 textNr) { //load text #"textNr" into textBuffer
 	if (patchMessage(textNr))
 		return &_textBuffer[0];
 
@@ -200,14 +189,14 @@ const char *Text::getText(uint32 textNr, bool extraDebug)
 	//return handy pointer to buffer
 	return &_textBuffer[0];
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------------------------------------------------------------
 //render text at cursor - called via mouseOn script - only once per touch
 void Text::fnPointerText(uint32 pointedId, uint16 mouseX, uint16 mouseY)
 {
 	Compact *ptrComp = _skyCompact->fetchCpt(pointedId);
-//	DisplayedText text = lowTextManager(ptrComp->cursorText, TEXT_MOUSE_WIDTH, L_CURSOR, 242, false, true);
-	DisplayedText text = lowTextManager(ptrComp->cursorText, GAME_SCREEN_WIDTH, L_CURSOR, 242, true, true);
+//	DisplayedText text = lowTextManager(ptrComp->cursorText, TEXT_MOUSE_WIDTH, L_CURSOR, 242, false);
+	DisplayedText text = lowTextManager(ptrComp->cursorText, GAME_SCREEN_WIDTH, L_CURSOR, 242, true);
 	Logic::_scriptVariables[CURSOR_ID] = text.compactNum;
 
 	uint8 *data = text.textData;
@@ -229,16 +218,13 @@ void Text::fnPointerText(uint32 pointedId, uint16 mouseX, uint16 mouseY)
 		index += 2;
 	}
 
-/*	if (Logic::_scriptVariables[MENU])
-	{
+/*	if (Logic::_scriptVariables[MENU]) {
 		_mouseOfsY = TOP_LEFT_Y - 2;
 		if (mouseX < 150)
 			_mouseOfsX = TOP_LEFT_X + 24;
 		else
 			_mouseOfsX = TOP_LEFT_X  - 8 - text.textWidth;
-	}
-	else//on-screen normal play
-	{
+	} else {
 		_mouseOfsY = TOP_LEFT_Y - 10;
 		if (mouseX < 150)
 			_mouseOfsX = TOP_LEFT_X + 13;
@@ -249,9 +235,9 @@ void Text::fnPointerText(uint32 pointedId, uint16 mouseX, uint16 mouseY)
 //	Compact *textCompact = _skyCompact->fetchCpt(text.compactNum);
 //	logicCursor(textCompact, TOP_LEFT_X-64, mouseY);
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------------
-void Text::logicCursor(Compact *textCompact, uint16 mouseX, uint16 mouseY)
-{
+void Text::logicCursor(Compact *textCompact, uint16 mouseX, uint16 mouseY) {
 	//called each cycle
 
 	textCompact->xcood = (uint16)(mouseX);// + _mouseOfsX);
@@ -260,9 +246,8 @@ void Text::logicCursor(Compact *textCompact, uint16 mouseX, uint16 mouseY)
 	if (textCompact->ycood < TOP_LEFT_Y)
 		textCompact->ycood = TOP_LEFT_Y;
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
-bool Text::getTextBit(uint8 **data, uint32 *bitPos)
-{
+
+bool Text::getTextBit(uint8 **data, uint32 *bitPos) {
 	if (*bitPos) {
 		(*bitPos)--;
 	} else {
@@ -272,7 +257,7 @@ bool Text::getTextBit(uint8 **data, uint32 *bitPos)
 
 	return (bool)(((**data) >> (*bitPos)) & 1);
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
+
 char Text::getTextChar(uint8 **data, uint32 *bitPos) {
 	int pos = 0;
 	while (1) {
@@ -287,21 +272,12 @@ char Text::getTextChar(uint8 **data, uint32 *bitPos) {
 	}
 }
 
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------------------------
 DisplayedText Text::displayText(uint32 textNum, uint8 *dest, bool centre, uint16 pixelWidth, uint8 color) {
 	//Render text into buffer *dest
-	getText(textNum, false);
+	getText(textNum);
 	return displayText(_textBuffer, dest, centre, pixelWidth, color);
 }
 
-
-
-
-//----------------------------------------------------------------------------------------------------------------------------------------
 //build speech bitmap?
 DisplayedText Text::displayText(char *textPtr, uint8 *dest, bool centre, uint16 pixelWidth, uint8 color) {
 	//Render text pointed to by *textPtr in buffer *dest
@@ -407,7 +383,7 @@ DisplayedText Text::displayText(char *textPtr, uint8 *dest, bool centre, uint16 
 	ret.textWidth = dtLastWidth;
 	return ret;
 }
-//----------------------------------------------------------------------------------------------------------------------------------------
+
 void Text::makeGameCharacter(uint8 textChar, uint8 *charSetPtr, uint8 *&dest, uint8 color, uint16 bufPitch) {
 	bool maskBit, dataBit;
 	uint8 charWidth = (uint8)((*(charSetPtr + textChar)) + 1 - _dtCharSpacing);
@@ -445,11 +421,9 @@ void Text::makeGameCharacter(uint8 textChar, uint8 *charSetPtr, uint8 *&dest, ui
 	dest = startPos + charWidth + _dtCharSpacing * 2 - 1;
 }
 
-
-//----------------------------------------------------------------------------------------------------------------------------------------
 //high level call to display text
-DisplayedText Text::lowTextManager(uint32 textNum, uint16 width, uint16 logicNum, uint8 color, bool centre, bool extraDebug) {
-	getText(textNum, extraDebug);
+DisplayedText Text::lowTextManager(uint32 textNum, uint16 width, uint16 logicNum, uint8 color, bool centre) {
+	getText(textNum);
 	DisplayedText textInfo = displayText(_textBuffer, NULL, centre, width, color);
 
 	uint32 compactNum = FIRST_TEXT_COMPACT;
@@ -513,7 +487,7 @@ void Text::initHuffTree() {
 		_huffTree = _huffTree_00368;
 		break;
 	case 372:
-	case 400:	//TEMP
+	case 400: //iBASS
 		_huffTree = _huffTree_00372;
 		break;
 	default:

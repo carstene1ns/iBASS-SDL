@@ -20,15 +20,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
- * $URL: https://scummvm.svn.sourceforge.net/svnroot/scummvm/scummvm/trunk/engines/sky/logic.h $
- * $Id: logic.h 28966 2007-09-19 08:40:12Z peres001 $
- *
  */
 
 #ifndef SKY_LOGIC_H
 #define SKY_LOGIC_H
 
-#include "system/common.h"
+#include "common/system.h"
 #include "system/random.h"
 
 namespace Sky {
@@ -133,8 +130,8 @@ class Screen;
 class Sound;
 class Text;
 class SkyCompact;
-class Logic;
 
+class Logic;
 
 typedef void (Logic::*LogicTable) ();
 typedef bool (Logic::*McodeTable) (uint32, uint32, uint32);
@@ -149,9 +146,6 @@ public:
 		Music *skyMusic,
 		Mouse *skyMouse,
 		Sound *skySound);
-
-
-
 	~Logic(void);
 	void engine();
 	void useControlInstance(Control *control) { _skyControl = control; }
@@ -175,7 +169,7 @@ private:
 	void setupMcodeTable();
 	const LogicTable *_logicTable;
 	const McodeTable *_mcodeTable;
-	bool	_liveInv;
+	bool _liveInv;
 
 protected:
 	void push(uint32);
