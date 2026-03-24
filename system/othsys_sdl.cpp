@@ -18,8 +18,7 @@
 
 #include "system/types.h"
 #include "system/othsys_sdl.h"
-
-#define RGB16(r, g, b)  ((((r)&0xf8) << 8) | (((g)&0xfc) << 3) | (((b)&0xf8) >> 3))
+#include "ext/cute_png.h"
 
 volatile int g_xCoord = 0;
 volatile int g_yCoord = 0;
@@ -31,52 +30,76 @@ const int GAME_H = 200;
 const float xScale = (480.0f / 320.0f);	//1.5
 const float yScale = (320.0f / 200.0f);	//1.6
 
-static const int invIconId[NUM_INV_ANIMS + 1] = {
-	2304,
-	3201,
-	3203,
-	3205,
-	3207,
-	3209,
-	3211,
-	4672,
-	4674,
-	5568,
-	5570,
-	12225,
-	12227,
-	12229,
-	12231,
-	12233,
-	12235,
-	12237,
-	12239,
-	12241,
-	12243,
-	12245,
-	12247,
-	12249,
-	12251,
-	12253,
-	12255,
-	12257,
-	16768,
-	16832,
-	16896,
-	16960,
-	17024,
-	17088,
-	17152,
-	17154,
-	17156,
-	17158,
-	17160,
-	17162,
-	17164,
-	17216,
-	17344,
-	17408,
-	-1,
+const struct {
+	int col;
+	int width;
+	int height;
+	int frames;
+} texInfoUI[] = {
+	{0, 48, 48, 6 }, // cogs
+	{1, 42, 44, 6 }, // exit_down
+	{2, 42, 44, 6 }, // exit_left
+	{3, 42, 44, 6 }, // exit_right
+	{4, 42, 44, 6 }, // exit_up
+	{5, 48, 48, 10 }, // eye
+	{6, 48, 48, 10 }, // hand
+	{7, 64, 60, 1 }, // hints
+	{8, 64, 60, 2 }, // inventory
+	{9, 48, 48, 10 }, // mouth
+	{10, 64, 60, 1 }, // options
+	{11, 16, 16, 3 }, // search
+};
+
+const struct {
+	int id;
+	int row;
+	int col;
+	int frames;
+} texInfoInv[] = {
+	{2304, 0, 0, 2 },
+	{3201, 0, 2, 2 },
+	{3203, 0, 4, 2 },
+	{3205, 0, 6, 2 },
+	{3207, 0, 8, 2 },
+	{3209, 1, 0, 2 },
+	{3211, 1, 2, 2 },
+	{4672, 1, 4, 2 },
+	{4674, 1, 6, 2 },
+	{5568, 1, 8, 2 },
+	{5570, 2, 0, 2 },
+	{12225, 2, 2, 2 },
+	{12227, 2, 4, 2 },
+	{12229, 2, 6, 2 },
+	{12231, 2, 8, 2 },
+	{12233, 3, 0, 2 },
+	{12235, 3, 2, 2 },
+	{12237, 3, 4, 2 },
+	{12239, 3, 6, 2 },
+	{12241, 3, 8, 2 },
+	{12243, 4, 0, 2 },
+	{12245, 4, 2, 2 },
+	{12247, 4, 4, 2 },
+	{12249, 4, 6, 2 },
+	{12251, 4, 8, 2 },
+	{12253, 5, 0, 2 },
+	{12255, 5, 2, 2 },
+	{12257, 5, 4, 2 },
+	{16768, 5, 6, 2 },
+	{16832, 5, 8, 2 },
+	{16896, 6, 0, 2 },
+	{16960, 6, 2, 2 },
+	{17024, 6, 4, 2 },
+	{17088, 6, 6, 2 },
+	{17152, 6, 8, 2 },
+	{17154, 7, 0, 2 },
+	{17156, 7, 2, 2 },
+	{17158, 7, 4, 2 },
+	{17160, 7, 6, 2 },
+	{17162, 7, 8, 2 },
+	{17164, 8, 0, 2 },
+	{17216, 8, 2, 2 },
+	{17344, 8, 4, 2 },
+	{17408, 8, 6, 2 },
 };
 
 void *loadFileToMem(const char *filename) {
@@ -120,7 +143,7 @@ Mix_Chunk *loadCAF(const void *buf) {
 			AUDIO_S16LSB, isStereo ? 2 : 1, sampleRate,
 			mixerFormat, mixerChannels, mixerFreq) < 0) {
 			free(pcm16);
-			printf("1\n");
+			printf("no audio cvt\n");
 			return res;
 		}
 		int samplesize = 2 * (isStereo ? 2 : 1);
@@ -128,7 +151,7 @@ Mix_Chunk *loadCAF(const void *buf) {
 		wavecvt.buf = (Uint8 *)calloc(1, wavecvt.len * wavecvt.len_mult);
 		if (wavecvt.buf == NULL) {
 			free(pcm16);
-			printf("2\n");
+			printf("malloc\n");
 			return res;
 		}
 		memcpy(wavecvt.buf, pcm16, wavecvt.len);
@@ -137,7 +160,7 @@ Mix_Chunk *loadCAF(const void *buf) {
 		/* Run the audio converter */
 		if (SDL_ConvertAudio(&wavecvt) < 0) {
 			free(wavecvt.buf);
-			printf("3\n");
+			printf("convert failed\n");
 			return res;
 		}
 
@@ -159,62 +182,19 @@ Mix_Chunk *loadCAF(const void *buf) {
 	return res;
 }
 
-Animation *OtherSystem_SDL::loadAnim(const char *filename) {
-	FILE *fp = fopen(filename, "rb");
+SDL_Texture *OtherSystem_SDL::loadPNG(const char *filename) {
+	//load file
+	cp_image_t img = cp_load_png(filename);
+	if(!img.pix) return nullptr;
 
-	if (!fp) {
-		return 0;
-	}
+	//Now generate the texture
+	SDL_Surface *tmp = SDL_CreateRGBSurfaceWithFormatFrom(img.pix, img.w,
+		img.h, 0, img.w * 4, SDL_PIXELFORMAT_RGBA32);
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(_renderer, tmp);
+	SDL_FreeSurface(tmp);
+	free(img.pix);
 
-	Animation *anim = new Animation;
-
-	int num_frames;
-	int width;
-	int height;
-	char magic[4];
-	fread(magic, 4, 1, fp);
-	fread(&num_frames, sizeof(int), 1, fp);
-	fread(&width, sizeof(int), 1, fp);
-	fread(&height, sizeof(int), 1, fp);
-
-	if (0 != strncmp(magic, "JPTX", 4) || width > 64 || height > 64) {
-		printf("TOO LARGE OR INVALID TEXTURE!\n");
-		return 0;
-	}
-
-	//printf("loadAnim(%s): num_frames: %d\n", filename, num_frames);
-	if (num_frames >= MAX_FRAMES) {
-		printf("Too many frames (%d)\n", num_frames);
-		return 0;
-	}
-
-	anim->num_frames = num_frames;
-	anim->width = width;
-	anim->height = height;
-
-	//TEMP 64x64 power of 2 fuckery
-	unsigned char *image_data = (unsigned char *)calloc(64 * 64 * 4, 1);
-
-	for (int frame = 0; frame < num_frames; frame++) {
-		memset(image_data, 0, 64 * 64 * 4);
-
-		for (int i = 0; i < height; i++) {
-			fread(image_data + (((height - 1) - i) * 64 * 4), width * 4, 1, fp);	//need to read in reversed!
-		}
-
-		//Now generate the texture
-		SDL_Surface *tmp = SDL_CreateRGBSurfaceWithFormatFrom(image_data, 64,
-			64, 0, 64 * 4, SDL_PIXELFORMAT_RGBA32);
-		SDL_Texture *tex = SDL_CreateTextureFromSurface(_renderer, tmp);
-		anim->frame_handle[frame] = _textures.size();
-		_textures.push_back(tex);
-		SDL_FreeSurface(tmp);
-	}
-
-	free(image_data);
-	fclose(fp);
-
-	return anim;
+	return tex;
 }
 
 OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height(height) {
@@ -228,6 +208,8 @@ OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height
 	memset(_pal32, 0, 256 * 4);
 
 	_gameScreenTexture = nullptr;
+	_uiTexture = nullptr;
+	_invTexture = nullptr;
 
 	_mouseX = 0;
 	_mouseY = 0;
@@ -250,32 +232,8 @@ OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height
 	_gameScreenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA32,
 		SDL_TEXTUREACCESS_STREAMING, GAME_W, GAME_H);
 
-	//Load UI textures
-	initIcon(UI_ICON_LOOK, "eye.tex");
-	initIcon(UI_ICON_USE, "cogs.tex");
-	initIcon(UI_ICON_HAND, "hand.tex");
-	initIcon(UI_ICON_MOUTH, "mouth.tex");
-	initIcon(UI_ICON_HELP, "hints.tex");
-	initIcon(UI_ICON_INV, "inventory.tex");
-	initIcon(UI_ICON_OPTIONS, "options.tex");
-	initIcon(UI_ICON_UP, "exit_up.tex");
-	initIcon(UI_ICON_DOWN, "exit_down.tex");
-	initIcon(UI_ICON_LEFT, "exit_left.tex");
-	initIcon(UI_ICON_RIGHT, "exit_right.tex");
-
-	//proximity
-	Animation *proximityAnimation = loadAnim("search.tex");
-		for (int i = 0; i < NUM_PROXIMITY_ICONS; i++) {
-		_proximityIcon[i].anim = proximityAnimation;
-	}
-
-	//load inventory graphics
-	for (int i = 0; i < NUM_INV_ANIMS; i++) {
-		char invTexFile[64];
-		sprintf(invTexFile, "%d.tex", invIconId[i]);
-
-		_invAnim[i] = loadAnim(invTexFile);
-	}
+	_uiTexture = loadPNG("ui.png");
+	_invTexture = loadPNG("inv.png");
 
 	_invVisible = false;
 
@@ -343,16 +301,14 @@ OtherSystem_SDL::~OtherSystem_SDL() {
 
 	Mix_Quit();
 
-	for(SDL_Texture *tex : _textures)
-		SDL_DestroyTexture(tex);
-	_textures.clear();
-
 	free(_offscreenBuf);
 	_offscreenBuf = nullptr;
 
 	free(_screenTexBuf);
 	_screenTexBuf = nullptr;
 
+	SDL_DestroyTexture(_uiTexture);
+	SDL_DestroyTexture(_invTexture);
 	SDL_DestroyTexture(_gameScreenTexture);
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
@@ -364,27 +320,23 @@ void OtherSystem_SDL::initIcons(void) {
 
 	for (int i = 0; i < NUM_UI_ICONS; i++) {
 		_uiIcon[i].reset();
+		_uiIcon[i].texId = i;
 	}
 
 	for (int i = 0; i < NUM_PROXIMITY_ICONS; i++) {
 		_proximityIcon[i].reset();
+		_proximityIcon[i].texId = NUM_UI_ICONS; // last icon row
 	}
 
 	for (int i = 0; i < NUM_INV_ICONS; i++) {
 		_invIcon[i].reset();
+		_invIcon[i].isInventory = true;
 		_invIcon[i].animating = false;
 	}
 
-	for (int i = 0; i < NUM_INV_ANIMS; i++) {
-		_invAnim[i] = 0;
-	}
-
 	_dragIcon.reset();
+	_dragIcon.isInventory = true;
 	_dragIcon.animating = false;
-}
-
-void OtherSystem_SDL::initIcon(int idx, const char *filename) {
-	_uiIcon[idx].anim = loadAnim(filename);
 }
 
 void OtherSystem_SDL::drawIcons(void) {
@@ -411,24 +363,41 @@ void OtherSystem_SDL::drawIcons(void) {
 }
 
 void OtherSystem_SDL::drawIcon(Icon *icon) {
-	const int texHandle = icon->anim->frame_handle[icon->cur_frame];
-	const int iconWidth = 64/2;
-	const int iconHeight = 64/2;
-
-	const SDL_Rect pos = { icon->x, icon->y, iconWidth, iconHeight };
+	const int id = icon->texId;
+	SDL_Texture *texHandle;
+	SDL_Rect dst = { icon->x, icon->y, 0, 0 };
+	if(icon->isInventory) {
+		texHandle = _invTexture;
+		dst.w = dst.h = 48/2;
+	} else {
+		texHandle = _uiTexture;
+		dst.w = texInfoUI[id].width/2;
+		dst.h = texInfoUI[id].height/2;
+	}
 
 	//fade down if necessary.
 	if (!icon->visible && icon->alpha > 0.0f) {
 		icon->alpha -= 0.40f;
 	}
 
-	if (icon->anim->num_frames > 1 && icon->animating) { //animate
+	auto checkAnimFrame = [&icon, id]() {
+		int frames = icon->isInventory ? texInfoInv[id].frames : texInfoUI[id].frames;
+
+		if (icon->cur_frame >= frames)
+			icon->cur_frame = 0;
+	};
+
+	auto isAnimating = [&icon, id]() -> bool {
+		int frames = icon->isInventory ? texInfoInv[id].frames : texInfoUI[id].frames;
+		return frames > 1 && icon->animating;
+	};
+
+	if (isAnimating()) { //animate
 		if (icon != &_uiIcon[UI_ICON_USE] ) {
 			//tick is used to display every other frame -- rather shitty, but does the job :)
 			if (icon->tick) {
 				icon->cur_frame++;
-
-				if (icon->cur_frame >= icon->anim->num_frames) icon->cur_frame = 0;
+				checkAnimFrame();
 
 				icon->tick = 0;
 			} else {
@@ -437,20 +406,29 @@ void OtherSystem_SDL::drawIcon(Icon *icon) {
 		} else {
 			//full-speed
 			icon->cur_frame++;
-
-			if (icon->cur_frame >= icon->anim->num_frames) icon->cur_frame = 0;
+			checkAnimFrame();
 		}
 	}
 
-	//perform any blending
-	SDL_SetTextureAlphaMod(_textures.at(texHandle), icon->alpha * 255);
+	//select frame
+	SDL_Rect src;
+	if(icon->isInventory) {
+		src = { (texInfoInv[id].col + icon->cur_frame) * 48,
+			texInfoInv[id].row * 48, 48, 48};
+	} else {
+		src = { texInfoUI[id].col * 64, icon->cur_frame * 64,
+			texInfoUI[id].width, texInfoUI[id].height };
+	}
 
-	SDL_RenderCopy(_renderer, _textures.at(texHandle), nullptr, &pos);
+	//perform any blending
+	SDL_SetTextureAlphaMod(texHandle, icon->alpha * 255);
+
+	SDL_RenderCopy(_renderer, texHandle, &src, &dst);
 }
 
 int OtherSystem_SDL::getInventoryAnimIdx(int frame) {
 	for (int i = 0; i < NUM_INV_ANIMS; i++) {
-		if (frame == invIconId[i])
+		if(frame == texInfoInv[i].id)
 			return i;
 	}
 

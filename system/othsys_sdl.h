@@ -25,7 +25,6 @@
 
 #include <SDL.h>
 #include <SDL_mixer.h>
-#include <vector>
 
 enum {
 	AUDIO_SFX0 = 0,
@@ -38,32 +37,23 @@ enum {
 
 #define	MAX_NUM_SFX	30
 
-
 #ifndef MAX_PATH
 #define MAX_PATH 256
 #endif
 
 #define MAX_FRAMES	16	//maximum number of frames per animation
 
-
-#define NUM_INV_ANIMS	44	//unique textures
-#define NUM_INV_ICONS	20	//(max) number of on-screen items
+#define NUM_INV_ANIMS 44	//unique textures
+#define NUM_INV_ICONS 20	//(max) number of on-screen items
 #define NUM_PROXIMITY_ICONS 16	//(max) number of proximity icons
-
-
-struct Animation {
-	int frame_handle[MAX_FRAMES];
-	int width;
-	int height;
-	int num_frames;
-};
 
 struct Icon {
 	int x;
 	int y;
 	bool visible;
 	bool animating;
-	Animation *anim;
+	bool isInventory;
+	int texId;
 	int cur_frame;
 	int tick;
 	float alpha;
@@ -73,7 +63,8 @@ struct Icon {
 	void reset(void) {
 		visible = false;
 		animating = true;
-		anim = 0;
+		isInventory = false;
+		texId = 0;
 		cur_frame = 0;
 		tick = 0;
 		x = y = 0;
@@ -204,7 +195,7 @@ public:
 			return;
 		}
 
-		_invIcon[_invIconsInUse].anim = _invAnim[getInventoryAnimIdx(frame)];
+		_invIcon[_invIconsInUse].texId = getInventoryAnimIdx(frame);
 		_invIcon[_invIconsInUse].set(x, y);
 		_invIcon[_invIconsInUse].cur_frame = highlighted ? 1 : 0;
 
@@ -231,7 +222,7 @@ public:
 	}
 
 	void setDragIcon(int frame, bool highlighted = false) {
-		_dragIcon.anim = _invAnim[getInventoryAnimIdx(frame)];
+		_dragIcon.texId = getInventoryAnimIdx(frame);
 		_dragIcon.set(0, 0);
 		_dragIcon.cur_frame = highlighted ? 1 : 0;
 	}
@@ -245,11 +236,9 @@ public:
 	}
 
 protected:
-	Animation *loadAnim(const char *filename);
-
 	void initIcons(void);
-	void initIcon(int idx, const char *filename);
 	void drawInvBackground(void);
+	SDL_Texture *loadPNG(const char *filename);
 
 	Mix_Music *_music;
 	Mix_Chunk *_speech;
@@ -295,14 +284,13 @@ protected:
 
 	SDL_Window *_window;
 	SDL_Renderer *_renderer;
-	std::vector<SDL_Texture*> _textures;
 
 	//texture handles
 	SDL_Texture *_gameScreenTexture;
+	SDL_Texture *_uiTexture;
+	SDL_Texture *_invTexture;
 
-	uint32 _pal32[256];	//32-bit version (for constructing 32-bit mouse texture)
-
-	Animation *_invAnim[NUM_INV_ANIMS];
+	uint32 _pal32[256];	//32-bit palette
 
 	Icon _dragIcon;
 

@@ -28,6 +28,8 @@ add_executable(sdlBASS
 	common/pack-start.h
 	common/scummsys.h
 	common/system.h
+	ext/cute_png.cpp
+	ext/cute_png.h
 	iBASS_fake.cpp
 	main.cpp
 	sky/autoroute.cpp
