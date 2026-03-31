@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.25...4.2)
+cmake_minimum_required(VERSION 3.22...4.3 FATAL_ERROR)
 
 project(iBASS-SDL VERSION 0.2.0 LANGUAGES CXX
 	DESCRIPTION "Beneath A Steel Sky: Remastered (SDL)"
 	HOMEPAGE_URL "")
-set(PROJECT_BUGREPORT "")
+set(PROJECT_BUGREPORT "https://github.com/carstene1ns/iBASS-SDL/issues")
 
 set(CMAKE_C_STANDARD 14)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -17,7 +17,7 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
 # external libs
-find_package(SDL2 REQUIRED)
+find_package(SDL2 2.0.18 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(ZLIB REQUIRED)
 

@@ -7,7 +7,12 @@ build-*/
 bass.dat
 speech.dat
 *.caf
+*.m4v
 *.mp3
+*.tex
+# iOS App GUI
+iBASS/menu/*.png
+iBASS/menu_*/*.png
 
 # Savegames
 SKY-VM.00?
