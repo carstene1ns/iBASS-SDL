@@ -18,17 +18,14 @@
 
 #include "system/types.h"
 #include "system/othsys_sdl.h"
-#include "ext/cute_png.h"
+#include <cute_png.h>
 
-volatile int g_xCoord = 0;
-volatile int g_yCoord = 0;
-volatile bool g_mouseDown = false;
+extern volatile int g_xCoord;
+extern volatile int g_yCoord;
+extern volatile bool g_mouseDown;
 
-const int GAME_W = 320;
-const int GAME_H = 200;
-
-const float xScale = (480.0f / 320.0f);	//1.5
-const float yScale = (320.0f / 200.0f);	//1.6
+constexpr int ICON_DIM = 64;
+constexpr int ICON_DIM_INV = 48;
 
 const struct {
 	int col;
@@ -102,7 +99,7 @@ const struct {
 	{17408, 8, 6, 2 },
 };
 
-void *loadFileToMem(const char *filename) {
+static void *loadFileToMem(const char *filename) {
 	FILE *fp = fopen(filename, "rb");
 	if (fp) {
 		fseek(fp, 0, SEEK_END);
@@ -117,9 +114,10 @@ void *loadFileToMem(const char *filename) {
 	return nullptr;
 }
 
+// ima4.cpp
 extern int16 *ima4CAFToPCM(const void *srcBuf, bool &isStereo, int &uncompressed_size, int &sampleRate);
 
-Mix_Chunk *loadCAF(const void *buf) {
+static Mix_Chunk *loadCAF(const void *buf) {
 	bool isStereo = false;
 	int uncompressed_size = 0;
 	int sampleRate = 0;
@@ -182,6 +180,28 @@ Mix_Chunk *loadCAF(const void *buf) {
 	return res;
 }
 
+static Mix_Chunk* loadSound(const char *name) {
+	char filename[32];
+
+	// first try relocated assets
+	snprintf(filename, sizeof(filename), "sfx/%s.caf", name);
+	void *buf = loadFileToMem(filename);
+	if(!buf) {
+		// try original location
+		snprintf(filename, sizeof(filename), "%s.caf", name);
+		buf = loadFileToMem(filename);
+	}
+	// check existence
+	if(!buf)
+		return nullptr;
+
+	Mix_Chunk *res = loadCAF(buf);
+	free(buf);
+	assert(res);
+
+	return res;
+}
+
 SDL_Texture *OtherSystem_SDL::loadPNG(const char *filename) {
 	//load file
 	cp_image_t img = cp_load_png(filename);
@@ -197,7 +217,8 @@ SDL_Texture *OtherSystem_SDL::loadPNG(const char *filename) {
 	return tex;
 }
 
-OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height(height) {
+OtherSystem_SDL::OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer) :
+	_window(window), _renderer(renderer) {
 	//allocate buffers
 	_offscreenBuf = (uint8 *)malloc(GAME_W * GAME_H);
 	_screenTexBuf = (uint32 *)malloc(GAME_W * GAME_H * 4);
@@ -221,25 +242,30 @@ OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height
 
 	initIcons();
 
-	SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
-
-	_window = SDL_CreateWindow("iBASS-SDL", SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED, GAME_W*3, GAME_H*3, SDL_WINDOW_RESIZABLE);
-
-	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_RenderSetLogicalSize(_renderer, GAME_W, GAME_H);
-
 	_gameScreenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA32,
 		SDL_TEXTUREACCESS_STREAMING, GAME_W, GAME_H);
 
-	_uiTexture = loadPNG("ui.png");
-	_invTexture = loadPNG("inv.png");
+	_uiTexture = loadPNG("gui/ui.png");
+	_invTexture = loadPNG("gui/inv.png");
 
 	_invVisible = false;
 
 	_invX1 = _invY1 = _invX2 = _invY2 = 0;
 
 	_needFullUpdate = true;
+
+	int w, h;
+	if (SDL_GetRendererOutputSize(_renderer, &w, &h) == 0) {
+		_winRect.x = 0;
+		_winRect.y = 0;
+		_winRect.w = w;
+		_winRect.h = h;
+
+		float xScale = w / GAME_W;
+		float yScale = h / GAME_H;
+
+		_scale = xScale > yScale ? yScale : xScale;
+	}
 
 	_musicSection = _musicSong = _prevMusicSection = _prevMusicSong = 0;
 
@@ -266,25 +292,12 @@ OtherSystem_SDL::OtherSystem_SDL(int width, int height) : _width(width), _height
 		_uiSFX[i] = nullptr;
 
 	//load UI sounds
-	void *buf = 0;
-
-	buf = loadFileToMem("sfx_menu_into.caf");
-	assert(buf);
-	_uiSFX[UI_SOUND_MENU_INTO] = loadCAF(buf);
+	_uiSFX[UI_SOUND_MENU_INTO] = loadSound("sfx_menu_into");
 	assert(_uiSFX[UI_SOUND_MENU_INTO]);
-	free(buf);
-
-	buf = loadFileToMem("sfx_menu_ack.caf");
-	assert(buf);
-	_uiSFX[UI_SOUND_MENU_ACK] = loadCAF(buf);
+	_uiSFX[UI_SOUND_MENU_ACK] = loadSound("sfx_menu_ack");
 	assert(_uiSFX[UI_SOUND_MENU_ACK]);
-	free(buf);
-
-	buf = loadFileToMem("sfx_bleep_fail.caf");
-	assert(buf);
-	_uiSFX[UI_SOUND_BLEEP_FAIL] = loadCAF(buf);
+	_uiSFX[UI_SOUND_BLEEP_FAIL] = loadSound("sfx_bleep_fail");
 	assert(_uiSFX[UI_SOUND_BLEEP_FAIL]);
-	free(buf);
 }
 
 OtherSystem_SDL::~OtherSystem_SDL() {
@@ -310,12 +323,9 @@ OtherSystem_SDL::~OtherSystem_SDL() {
 	SDL_DestroyTexture(_uiTexture);
 	SDL_DestroyTexture(_invTexture);
 	SDL_DestroyTexture(_gameScreenTexture);
-	SDL_DestroyRenderer(_renderer);
-	SDL_DestroyWindow(_window);
-	SDL_Quit();
 }
 
-void OtherSystem_SDL::initIcons(void) {
+void OtherSystem_SDL::initIcons() {
 	_invIconsInUse = 0;
 
 	for (int i = 0; i < NUM_UI_ICONS; i++) {
@@ -339,7 +349,7 @@ void OtherSystem_SDL::initIcons(void) {
 	_dragIcon.animating = false;
 }
 
-void OtherSystem_SDL::drawIcons(void) {
+void OtherSystem_SDL::drawIcons() {
 	//render proximity icons first (they can be underneath regular icons)
 	for (int i = 0; i < NUM_PROXIMITY_ICONS; i++) {
 		if (_proximityIcon[i].visible || _proximityIcon[i].alpha > 0.0f) {
@@ -365,14 +375,16 @@ void OtherSystem_SDL::drawIcons(void) {
 void OtherSystem_SDL::drawIcon(Icon *icon) {
 	const int id = icon->texId;
 	SDL_Texture *texHandle;
-	SDL_Rect dst = { icon->x, icon->y, 0, 0 };
+	const int xPos = icon->x * _scale + _winRect.x;
+	const int yPos = icon->y * _scale + _winRect.y;
+	SDL_Rect dst = { xPos, yPos, 0, 0 };
 	if(icon->isInventory) {
 		texHandle = _invTexture;
-		dst.w = dst.h = 48/2;
+		dst.w = dst.h = (ICON_DIM / 2) * _scale;
 	} else {
 		texHandle = _uiTexture;
-		dst.w = texInfoUI[id].width/2;
-		dst.h = texInfoUI[id].height/2;
+		dst.w = (texInfoUI[id].width / 2) * _scale;
+		dst.h = (texInfoUI[id].height / 2) * _scale;
 	}
 
 	//fade down if necessary.
@@ -413,10 +425,10 @@ void OtherSystem_SDL::drawIcon(Icon *icon) {
 	//select frame
 	SDL_Rect src;
 	if(icon->isInventory) {
-		src = { (texInfoInv[id].col + icon->cur_frame) * 48,
-			texInfoInv[id].row * 48, 48, 48};
+		src = { (texInfoInv[id].col + icon->cur_frame) * ICON_DIM_INV,
+			texInfoInv[id].row * ICON_DIM_INV, ICON_DIM_INV, ICON_DIM_INV };
 	} else {
-		src = { texInfoUI[id].col * 64, icon->cur_frame * 64,
+		src = { texInfoUI[id].col * ICON_DIM, icon->cur_frame * ICON_DIM,
 			texInfoUI[id].width, texInfoUI[id].height };
 	}
 
@@ -433,22 +445,25 @@ int OtherSystem_SDL::getInventoryAnimIdx(int frame) {
 	}
 
 	printf("Couldn't find inventory item %d\n", frame);
-	return 0;	//fallback
+	return 0; //fallback
 }
 
-void OtherSystem_SDL::drawInvBackground(void) {
+void OtherSystem_SDL::drawInvBackground() {
 	if (_invX2 <= _invX1 || _invY2 <= _invY1)
 		return;
 
-	const int rectWidth = (_invY2 - _invY1) * yScale;
-	const int rectHeight = (_invX2 - _invX1) * xScale;
-
-	const int xPos = (320 - rectWidth) - (_invY1 * yScale);
-	const int yPos = (480 - rectHeight) - (_invX1 * xScale);
+	const int rectWidth = (_invX2 - _invX1) * _scale;
+	const int rectHeight = (_invY2 - _invY1) * _scale;
+	const int xPos = _invX1 * _scale + _winRect.x;
+	const int yPos = _invY1 * _scale + _winRect.y;
 
 	const SDL_Rect pos = { xPos, yPos, rectWidth, rectHeight };
 
-	// TODO: scanlines
+	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0xCC);
+	SDL_RenderFillRect(_renderer, &pos);
+	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0xFF);
+	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_NONE);
 }
 
 void OtherSystem_SDL::setPalette(const uint8 *colors, int start, int num) {
@@ -463,37 +478,15 @@ void OtherSystem_SDL::setPalette(const uint8 *colors, int start, int num) {
 }
 
 bool OtherSystem_SDL::pollEvent(Event *event) {
-	SDL_Event e;
-	while (SDL_PollEvent(&e) != 0) {
-		switch(e.type) {
-			case SDL_QUIT:
-				exit(0);
-				break;
-			case SDL_MOUSEMOTION:
-				if(e.button.x >= 0 && e.button.x <= GAME_W &&
-					e.button.y >= 0 && e.button.y <= GAME_H) {
-					g_xCoord = e.motion.x;
-					g_yCoord = e.motion.y;
-				}
-			break;
-			case SDL_MOUSEBUTTONDOWN: //FALL-THROUGH
-			case SDL_MOUSEBUTTONUP:
-				if(e.button.x >= 0 && e.button.x <= GAME_W &&
-					e.button.y >= 0 && e.button.y <= GAME_H) {
-					g_xCoord = e.button.x;
-					g_yCoord = e.button.y;
-					if (e.button.button == 1)
-						g_mouseDown = (e.button.state == SDL_PRESSED);
-				}
-			break;		
-			default:
-			break;
-		}	
-	}
-
 	static bool prevCycleDown = false;
 	static int prevMouseX = 0;
 	static int prevMouseY = 0;
+
+	int x, y;
+	auto res = SDL_GetMouseState(&x, &y);
+	g_mouseDown = res & SDL_BUTTON(1);
+	g_xCoord = (x - _winRect.x) / _scale;
+	g_yCoord = (y - _winRect.y) / _scale;
 
 	if (prevCycleDown && !g_mouseDown) {
 		event->type = EVENT_LBUTTONUP;	//EVENT_RBUTTONUP
@@ -536,7 +529,7 @@ bool OtherSystem_SDL::pollEvent(Event *event) {
 
 
 void OtherSystem_SDL::copyRectToScreen(const uint8 *buf, int pitch, int x, int y, int w, int h) {
-	if ((x + w > _width) || (y + h > _height)) {
+	if ((x < 0) || (y < 0) || (x + w > GAME_W) || (y + h > GAME_H)) {
 		return;
 	}
 
@@ -557,7 +550,7 @@ void OtherSystem_SDL::copyRectToScreen(const uint8 *buf, int pitch, int x, int y
 	}
 }
 
-void OtherSystem_SDL::fullTextureUpdate(void) {
+void OtherSystem_SDL::fullTextureUpdate() {
 	for (int h = 0; h < GAME_H; h++) {
 		uint32 *lineStart = &_screenTexBuf[h * GAME_W];
 
@@ -567,7 +560,12 @@ void OtherSystem_SDL::fullTextureUpdate(void) {
 	}
 }
 
-void OtherSystem_SDL::updateScreen(void) {
+void OtherSystem_SDL::updateWindow(SDL_Rect window, float scale) {
+	_winRect = window;
+	_scale = scale;
+}
+
+void OtherSystem_SDL::updateScreen() {
 	SDL_RenderClear(_renderer);
 
 	if (_needFullUpdate) {
@@ -575,8 +573,12 @@ void OtherSystem_SDL::updateScreen(void) {
 		_needFullUpdate = false;
 	}
 
+	const int screenWidth = GAME_W * _scale;
+	const int screenHeight = GAME_H * _scale;
+	SDL_Rect dst = { _winRect.x, _winRect.y, screenWidth, screenHeight };
+
 	SDL_UpdateTexture(_gameScreenTexture, nullptr, _screenTexBuf, GAME_W * 4);
-	SDL_RenderCopy(_renderer, _gameScreenTexture, nullptr, nullptr);
+	SDL_RenderCopy(_renderer, _gameScreenTexture, nullptr, &dst);
 
 	if (_invVisible) {
 		drawInvBackground();
@@ -606,7 +608,7 @@ void OtherSystem_SDL::setDragIconDrawOffset(int x, int y) {
 	_dragIconDrawOffsetY = y;
 }
 
-uint32 OtherSystem_SDL::getMillis(void) {
+uint32 OtherSystem_SDL::getMillis() {
 	return SDL_GetTicks();
 }
 
@@ -716,32 +718,25 @@ int getSFXNumber(int sfx) {
 		return 604;
 		break;
 	default:
+		//apparently not a dupe!
+		return sfx;
 		break;
 	}
-
-	//apparently not a dupe!
-	return sfx;
 }
 
 void OtherSystem_SDL::loadSFXSection(int section) {
 	//printf("loadSFXSection(%d)\n", section);
 
+	char sfxFileName[32];
 	for (int i = 0; i < MAX_NUM_SFX; i++) {
-		char sfxFileName[64];
-		int sfxNum = (section * 100) + i;
+		// free up old resources
+		Mix_FreeChunk(_sfx[i]);
 
-		sfxNum = getSFXNumber(sfxNum);
+		int sfxNum = getSFXNumber((section * 100) + i);
 
-		sprintf(sfxFileName, "sfx_%03d.caf", sfxNum);
-
-		void *buf = loadFileToMem(sfxFileName);
-		if (buf) {
-			Mix_FreeChunk(_sfx[i]);
-			_sfx[i] = nullptr;
-			_sfx[i] = loadCAF(buf);
-			assert(_sfx[i]);
-			free(buf);
-		}
+		// load new
+		snprintf(sfxFileName, sizeof(sfxFileName), "sfx_%03d", sfxNum);
+		_sfx[i] = loadSound(sfxFileName);
 	}
 }
 
@@ -769,29 +764,26 @@ void OtherSystem_SDL::startMusic(int section, int song) {
 		song = 4;
 	}
 
-	char musicFile[64];
-	sprintf(musicFile, "music_%03d.mp3", (section * 100) + song);
-
+	char musicFile[32];
+	int musNum = (section * 100) + song;
+	// first try relocated assets
+	snprintf(musicFile, sizeof(musicFile), "music/music_%03d.mp3", musNum);
 	_music = Mix_LoadMUS(musicFile);
+	if(!_music) {
+		// try original location
+		snprintf(musicFile, sizeof(musicFile), "music_%03d.mp3", musNum);
+		_music = Mix_LoadMUS(musicFile);
+	}
 
 	// check existence
 	if(!_music) return;
 
 	int numberOfLoops = -1; //set to looping...
 	//...unless
-	if (	(section == 1 && song == 1)
-		|| (section == 1 && song == 4)
-		|| (section == 2 && song == 1)
-		|| (section == 2 && song == 4)
-		|| (section == 4 && song == 2)
-		|| (section == 4 && song == 3)
-		|| (section == 4 && song == 5)
-		|| (section == 4 && song == 6)
-		|| (section == 4 && song == 6)
-		|| (section == 4 && song == 11)
-		|| (section == 5 && song == 1)
-		|| (section == 5 && song == 3)
-		|| (section == 5 && song == 4)
+	if ((section == 1 && (song == 1 || song == 4))
+		|| (section == 2 && (song == 1 || song == 4))
+		|| (section == 4 && (song == 2 || song == 3 || song == 5 || song == 6 ||song == 11))
+		|| (section == 5 && (song == 1 || song == 3 || song == 4))
 		) {
 		numberOfLoops = 0;	//these are non-looping
 	}
@@ -799,12 +791,12 @@ void OtherSystem_SDL::startMusic(int section, int song) {
 	Mix_FadeInMusic(_music, numberOfLoops, 250);
 }
 
-void OtherSystem_SDL::stopMusic(void) {
+void OtherSystem_SDL::stopMusic() {
 	Mix_HaltMusic();
 	Mix_FreeMusic(_music);
 }
 
-bool OtherSystem_SDL::isMusicPlaying(void) const {
+bool OtherSystem_SDL::isMusicPlaying() const {
 	return Mix_PlayingMusic();
 }
 
@@ -813,7 +805,7 @@ void OtherSystem_SDL::setMusicVolume(float volume) {
 	Mix_VolumeMusic(volume * MIX_MAX_VOLUME);
 }
 
-float OtherSystem_SDL::getMusicVolume(void) const {
+float OtherSystem_SDL::getMusicVolume() const {
 	return _musicVolume;
 }
 
@@ -828,11 +820,11 @@ void OtherSystem_SDL::playSpeech(void *mem, int size) {
 	Mix_PlayChannel(AUDIO_SPEECH, _speech, 0);
 }
 
-void OtherSystem_SDL::stopSpeech(void) {
+void OtherSystem_SDL::stopSpeech() {
 	Mix_HaltChannel(AUDIO_SPEECH);
 }
 
-bool OtherSystem_SDL::isSpeechPlaying(void) const {
+bool OtherSystem_SDL::isSpeechPlaying() const {
 	return Mix_Playing(AUDIO_SPEECH);
 }
 
@@ -840,7 +832,7 @@ void OtherSystem_SDL::setSpeechVolume(float volume) {
 	_speechVolume = volume;
 }
 
-float OtherSystem_SDL::getSpeechVolume(void) const {
+float OtherSystem_SDL::getSpeechVolume() const {
 	return _speechVolume;
 }
 
@@ -870,7 +862,7 @@ void OtherSystem_SDL::setSFXVolume(float volume) {
 	Mix_Volume(AUDIO_SFX1, _sfxVolume * _effectVol[0] * MIX_MAX_VOLUME);
 }
 
-float OtherSystem_SDL::getSFXVolume(void) const {
+float OtherSystem_SDL::getSFXVolume() const {
 	return _sfxVolume;
 }
 
@@ -916,7 +908,7 @@ void OtherSystem_SDL::pauseAudioForMenu(bool pause, bool playMenuMusic) {
 	}
 }
 
-void OtherSystem_SDL::clearPauseFlag(void) {
+void OtherSystem_SDL::clearPauseFlag() {
 	_audioPaused = false;
 }
 
@@ -930,6 +922,6 @@ void OtherSystem_SDL::playUISFX(int num) {
 	Mix_PlayChannel(AUDIO_SFX_UI, _uiSFX[num], 0);
 }
 
-void OtherSystem_SDL::quit(void) const {
+void OtherSystem_SDL::quit() const {
 
 }

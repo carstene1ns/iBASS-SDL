@@ -35,6 +35,9 @@ enum {
 	AUDIO_NUM_BUFFERS
 };
 
+#define GAME_W 320
+#define GAME_H 200
+
 #define	MAX_NUM_SFX	30
 
 #ifndef MAX_PATH
@@ -60,7 +63,7 @@ struct Icon {
 
 	Icon() { reset(); }
 
-	void reset(void) {
+	void reset() {
 		visible = false;
 		animating = true;
 		isInventory = false;
@@ -82,48 +85,47 @@ struct Icon {
 
 class OtherSystem_SDL : public OtherSystem {
 public:
-	OtherSystem_SDL(int width, int height);
+	OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer);
 	virtual ~OtherSystem_SDL();
 
 	virtual void setPalette(const uint8 *colors, int start, int num);
 	virtual bool pollEvent(Event *event);
 	virtual void copyRectToScreen(const uint8 *buf, int pitch, int x, int y, int w, int h);
-	virtual void updateScreen(void);
-	virtual uint32 getMillis(void);
+	virtual void updateScreen();
+	virtual uint32 getMillis();
 	virtual void delayMillis(uint32 msecs);
 
-	void drawMouse(void);
-	void fullTextureUpdate(void);
+	void fullTextureUpdate();
+	void updateWindow(SDL_Rect window, float scale);
 
 	virtual void startMusic(int section, int song);
-	virtual void stopMusic(void);
-	virtual bool isMusicPlaying(void) const;
+	virtual void stopMusic();
+	virtual bool isMusicPlaying() const;
 	virtual void setMusicVolume(float volume);
-	virtual float getMusicVolume(void) const;
+	virtual float getMusicVolume() const;
 
 	virtual void playSpeech(void *mem, int size);
-	virtual void stopSpeech(void);
-	virtual bool isSpeechPlaying(void) const;
+	virtual void stopSpeech();
+	virtual bool isSpeechPlaying() const;
 	virtual void setSpeechVolume(float volume);
-	virtual float getSpeechVolume(void) const;
+	virtual float getSpeechVolume() const;
 
 	virtual void loadSFXSection(int section);
 	virtual void playSFX(int section, int sound, int chan, float volume, bool loop);
 	virtual void stopSFX(int chan);
 	virtual bool isSFXPlaying(int chan) const;
 	virtual void setSFXVolume(float volume);
-	virtual float getSFXVolume(void) const;
+	virtual float getSFXVolume() const;
 	virtual void pauseAudioForMenu(bool pause, bool playMenuMusic = true);
 	virtual void playUISFX(int num);
-	virtual void clearPauseFlag(void);
+	virtual void clearPauseFlag();
 
-	virtual void quit(void) const;
+	virtual void quit() const;
 
 	void setDragIconDrawOffset(int x, int y);
 
 	void drawIcon(Icon *icon);
-	void drawIcons(void);
-
+	void drawIcons();
 
 	void setIcon(int idx, int x, int y) {
 		if (idx < 0 || idx >= NUM_UI_ICONS)
@@ -164,7 +166,6 @@ public:
 		_proximityIcon[idx].cur_frame = frame;
 	}
 
-
 	void setProximityNotAnimate(int idx) {
 		if (idx < 0 || idx >= NUM_PROXIMITY_ICONS)
 			return;
@@ -202,7 +203,7 @@ public:
 		_invIconsInUse++;
 	}
 
-	void clearAllInvIcons(void) {
+	void clearAllInvIcons() {
 		_invIconsInUse = 0;
 		//... no real point in clearing the struct
 	}
@@ -217,7 +218,7 @@ public:
 		_invVisible = true;
 	}
 
-	void hideInventory(void) {
+	void hideInventory() {
 		_invVisible = false;
 	}
 
@@ -227,7 +228,7 @@ public:
 		_dragIcon.cur_frame = highlighted ? 1 : 0;
 	}
 
-	virtual void clearDragIcon(void) {
+	virtual void clearDragIcon() {
 		_dragIcon.visible = false;
 	}
 
@@ -236,8 +237,8 @@ public:
 	}
 
 protected:
-	void initIcons(void);
-	void drawInvBackground(void);
+	void initIcons();
+	void drawInvBackground();
 	SDL_Texture *loadPNG(const char *filename);
 
 	Mix_Music *_music;
@@ -261,7 +262,8 @@ protected:
 	int _prevMusicSong;
 	bool _audioPaused;
 
-	int _width, _height;
+	SDL_Rect _winRect;
+	float _scale;
 
 	bool _invVisible;
 	int _invX1;

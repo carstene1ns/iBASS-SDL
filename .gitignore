@@ -2,3 +2,15 @@
 # CMake
 /build/
 build-*/
+
+# Game data
+bass.dat
+speech.dat
+*.caf
+*.mp3
+
+# Savegames
+SKY-VM.00?
+SKY-HINTS.00?
+SAVESLOTS.ADW
+DATA.JP7
