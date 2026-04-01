@@ -27,6 +27,7 @@
 
 #include "common/scummsys.h"
 #include "system/othsys.h"
+#include <unordered_map>
 
 namespace Sky {
 
@@ -51,14 +52,12 @@ struct SpeechFileEntry {
 	uint32 filenum;
 	uint32 offset;
 	uint32 size;
-	SpeechFileEntry() : filenum(0), offset(0), size(0) {}
 };
 
 
 class SpeechFileSystem {
 private:
-	uint32 _numFiles;
-	SpeechFileEntry *_entry;
+	std::unordered_map<uint32, SpeechFileEntry> _entries;
 	FILE *_fp;
 
 public:
@@ -68,7 +67,6 @@ public:
 	bool exists(uint32 filenum);
 	uint32 getFileSize(uint32 filenum);
 	void *getSpeechFile(uint32 filenum);
-	SpeechFileEntry *getEntry(uint32 filenum);
 };
 
 

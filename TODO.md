@@ -35,3 +35,10 @@
   (see `SkyEngine::runGameCycle()`)
 - Inventory is maximum 11 objects in iBASS it seems, investigate if scrolling is
   needed somewhere.
+
+## SDL Port
+
+- Aspect ratio correction: scale height nearest neigbor by 6 and then downscale
+  bilinear down to render size
+- Render ingame touch gui outside game canvas, if screen is wide enough
+- Restore compatibility with big endian platforms

@@ -31,20 +31,8 @@
 
 namespace Sky {
 
-
 #define	READ_SUCCEEDED	(1 == result)
 #define ASSERT(x) assert(x)
-
-static int hashCompFunc(const void *m1, const void *m2) {
-	FileEntry *e1 = (FileEntry *)m1;
-	FileEntry *e2 = (FileEntry *)m2;
-
-	if (e1->filenum == e2->filenum)
-		return 0;
-
-	return (e1->filenum < e2->filenum ? -1 : 1);
-}
-
 
 Disk::Disk() {
 	_fp = fopen("./bass.dat", "rb");
@@ -54,30 +42,47 @@ Disk::Disk() {
 	int result = fread(magic, 4, 1, _fp);
 	ASSERT(READ_SUCCEEDED);
 	ASSERT(0 == strncmp("HSFS", magic, 4));
-	result = fread(&_numFiles, sizeof(uint32), 1, _fp);
+	uint32 numFiles;
+	result = fread(&numFiles, sizeof(uint32), 1, _fp);
 	ASSERT(READ_SUCCEEDED);
 
-	_entry = new FileEntry[_numFiles];
+#ifdef SCUMM_BIG_ENDIAN
+	// untested
+	numFiles = FROM_LE_32(numFiles);
+#endif
+
+	_entries.reserve(numFiles);
 
 	//now populate the entry table
-	for (uint32 i = 0; i < _numFiles; i++) {
-		result = fread(&_entry[i].filenum, sizeof(uint32), 1, _fp);
+	uint32 filenum, offset, size, compressed_size;
+	for (uint32 i = 0; i < numFiles; i++) {
+		result = fread(&filenum, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
-		result = fread(&_entry[i].offset, sizeof(uint32), 1, _fp);
+		result = fread(&offset, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
-		result = fread(&_entry[i].size, sizeof(uint32), 1, _fp);
+		result = fread(&size, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
-		result = fread(&_entry[i].compressed_size, sizeof(uint32), 1, _fp);
+		result = fread(&compressed_size, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
+
+#ifdef SCUMM_BIG_ENDIAN
+		// untested
+		filenum = FROM_LE_32(filenum);
+		offset = FROM_LE_32(offset);
+		size = FROM_LE_32(size);
+		compressed_size = FROM_LE_32(compressed_size);
+#endif
+
+		_entries.emplace(filenum,
+			FileEntry{filenum, offset, size, compressed_size});
 	}
 
 	memset(_buildList, 0, 60 * 2);
 	memset(_loadedFilesList, 0, 60 * 4);
 }
 
-Disk::~Disk(void) {
-	delete[] _entry;
-	_entry = 0;
+Disk::~Disk() {
+	_entries.clear();
 
 	if (_fp) {
 		fclose(_fp);
@@ -87,42 +92,34 @@ Disk::~Disk(void) {
 }
 
 bool Disk::fileExists(uint16 fileNr) {
-	return (getEntry(fileNr) != NULL);
+	return (_entries.count(fileNr) != 0);
 }
-
-FileEntry *Disk::getEntry(uint32 filenum) {
-	FileEntry searchEntry;
-	searchEntry.filenum = filenum;
-
-	return (FileEntry *)bsearch(&searchEntry, _entry, _numFiles, sizeof(FileEntry), hashCompFunc);
-}
-
 
 // allocate memory, load the file and return a pointer
 uint8 *Disk::loadFile(uint16 fileNr) {
-	FileEntry *entry = getEntry(fileNr);
+	if (fileExists(fileNr)) {
+		FileEntry entry = _entries.at(fileNr);
 
-	if (entry) {
-		uint8 *compressedData = (uint8 *)malloc(entry->compressed_size);
-		uint8 *uncompressedData = (uint8 *)malloc(entry->size);
-		fseek(_fp, entry->offset, SEEK_SET);
-		int result = fread(compressedData, entry->compressed_size, 1, _fp);
+		uint8 *compressedData = (uint8 *)malloc(entry.compressed_size);
+		uint8 *uncompressedData = (uint8 *)malloc(entry.size);
+		fseek(_fp, entry.offset, SEEK_SET);
+		int result = fread(compressedData, entry.compressed_size, 1, _fp);
 		ASSERT(READ_SUCCEEDED);
 
-		uLongf destLen = entry->size;
-		result = uncompress(uncompressedData, &destLen, compressedData, entry->compressed_size);
+		uLongf destLen = entry.size;
+		result = uncompress(uncompressedData, &destLen, compressedData, entry.compressed_size);
 
 		ASSERT(Z_OK == result);
 
 		free(compressedData);
 
-		_lastLoadedFileSize = entry->size;
+		_lastLoadedFileSize = entry.size;
 
 		return uncompressedData;
 	}
 
 	_lastLoadedFileSize = 0;
-	return NULL;	//not found
+	return nullptr; //not found
 }
 
 uint16 *Disk::loadScriptFile(uint16 fileNr) {
@@ -158,7 +155,7 @@ void Disk::fnCacheFast(uint16 *fList) {
 	}
 }
 
-void Disk::fnCacheFiles(void) {
+void Disk::fnCacheFiles() {
 	uint16 lCnt, bCnt, targCnt;
 	targCnt = lCnt = 0;
 	bool found;
@@ -240,7 +237,7 @@ void Disk::fnMiniLoad(uint16 fileNum) {
 	SkyEngine::_itemList[fileNum & 2047] = (void**)loadFile(fileNum);
 }
 
-void Disk::fnFlushBuffers(void) {
+void Disk::fnFlushBuffers() {
 	// dump all loaded sprites
 	uint8 lCnt = 0;
 	while (_loadedFilesList[lCnt]) {

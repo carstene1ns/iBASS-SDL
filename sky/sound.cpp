@@ -1023,17 +1023,7 @@ int g_section = 0;
 #define	READ_SUCCEEDED	(1 == result)
 #define ASSERT(x) assert(x)
 
-static int hashCompFunc(const void *m1, const void *m2) {
-	SpeechFileEntry *e1 = (SpeechFileEntry *)m1;
-	SpeechFileEntry *e2 = (SpeechFileEntry *)m2;
-
-	if (e1->filenum == e2->filenum)
-		return 0;
-
-	return (e1->filenum < e2->filenum ? -1 : 1);
-}
-
-SpeechFileSystem::SpeechFileSystem() : _numFiles(0), _entry(0), _fp(0) {
+SpeechFileSystem::SpeechFileSystem() : _fp(0) {
 	_fp = fopen("./speech.dat", "rb");
 	ASSERT(_fp);
 
@@ -1041,25 +1031,41 @@ SpeechFileSystem::SpeechFileSystem() : _numFiles(0), _entry(0), _fp(0) {
 	int result = fread(magic, 4, 1, _fp);
 	ASSERT(READ_SUCCEEDED);
 	ASSERT(0 == strncmp("SPCH", magic, 4));
-	result = fread(&_numFiles, sizeof(uint32), 1, _fp);
+	uint32 numFiles;
+	result = fread(&numFiles, sizeof(uint32), 1, _fp);
 	ASSERT(READ_SUCCEEDED);
 
-	_entry = new SpeechFileEntry[_numFiles];
+#ifdef SCUMM_BIG_ENDIAN
+	// untested
+	numFiles = FROM_LE_32(numFiles);
+#endif
+
+	_entries.reserve(numFiles);
 
 	//now populate the entry table
-	for (uint32 i = 0; i < _numFiles; i++) {
-		result = fread(&_entry[i].filenum, sizeof(uint32), 1, _fp);
+	uint32 filenum, offset, size;
+	for (uint32 i = 0; i < numFiles; i++) {
+		result = fread(&filenum, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
-		result = fread(&_entry[i].offset, sizeof(uint32), 1, _fp);
+		result = fread(&offset, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
-		result = fread(&_entry[i].size, sizeof(uint32), 1, _fp);
+		result = fread(&size, sizeof(uint32), 1, _fp);
 		ASSERT(READ_SUCCEEDED);
+
+#ifdef SCUMM_BIG_ENDIAN
+		// untested
+		filenum = FROM_LE_32(filenum);
+		offset = FROM_LE_32(offset);
+		size = FROM_LE_32(size);
+#endif
+
+		_entries.emplace(filenum,
+			SpeechFileEntry{filenum, offset, size});
 	}
 }
 
 SpeechFileSystem::~SpeechFileSystem() {
-	delete[] _entry;
-	_entry = 0;
+	_entries.clear();
 
 	if (_fp) {
 		fclose(_fp);
@@ -1068,41 +1074,30 @@ SpeechFileSystem::~SpeechFileSystem() {
 	_fp = 0;
 }
 
-
-SpeechFileEntry *SpeechFileSystem::getEntry(uint32 filenum) {
-	SpeechFileEntry searchEntry;
-	searchEntry.filenum = filenum;
-
-	return (SpeechFileEntry *)bsearch(&searchEntry, _entry, _numFiles, sizeof(SpeechFileEntry), hashCompFunc);
-}
-
 bool SpeechFileSystem::exists(uint32 filenum) {
-	return (getEntry(filenum) != NULL);
+	return (_entries.count(filenum) != 0);
 }
 
 uint32 SpeechFileSystem::getFileSize(uint32 filenum) {
-	SpeechFileEntry *entry = getEntry(filenum);
-
-	if (entry) {
-		return entry->size;
+	if (exists(filenum)) {
+		return _entries.at(filenum).size;
 	}
 
-	return 0;	//file not found
+	return 0; //file not found
 }
 
-
 void *SpeechFileSystem::getSpeechFile(uint32 filenum) {
-	SpeechFileEntry *entry = getEntry(filenum);
+	if (exists(filenum)) {
+		SpeechFileEntry entry = _entries.at(filenum);
 
-	if (entry) {
-		void *data = malloc(entry->size);
-		fseek(_fp, entry->offset, SEEK_SET);
-		int result = fread(data, entry->size, 1, _fp);
+		void *data = malloc(entry.size);
+		fseek(_fp, entry.offset, SEEK_SET);
+		int result = fread(data, entry.size, 1, _fp);
 		ASSERT(READ_SUCCEEDED);
 		return data;
 	}
 
-	return NULL;	//not found
+	return nullptr; //not found
 }
 
 Sound::Sound(Disk *pDisk, OtherSystem *pSystem, uint8 pVolume) {

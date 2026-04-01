@@ -35,7 +35,7 @@ public:
 	}
 
 	void Quit();
-	bool WantQuit() { return _want_quit; }
+	bool WantQuit() const { return _want_quit; }
 
 protected:
 	CPanelMan() = default;

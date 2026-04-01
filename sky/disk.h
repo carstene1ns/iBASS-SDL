@@ -27,6 +27,7 @@
 
 
 #include "common/scummsys.h"
+#include <unordered_map>
 
 #define MAX_FILES_IN_LIST 60
 
@@ -37,7 +38,6 @@ struct FileEntry {
 	uint32 offset;
 	uint32 size;
 	uint32 compressed_size;
-	FileEntry() : filenum(0), offset(0), size(0), compressed_size(0) {}
 };
 
 
@@ -57,18 +57,14 @@ public:
 	void fnMiniLoad(uint16 fileNum);
 	void fnCacheFast(uint16 *fList);
 	void fnCacheChip(uint16 *fList);
-	void fnCacheFiles(void);
-	void fnFlushBuffers(void);
-	uint32 *giveLoadedFilesList(void) { return _loadedFilesList; }
+	void fnCacheFiles();
+	void fnFlushBuffers();
+	uint32 *giveLoadedFilesList() { return _loadedFilesList; }
 	void refreshFilesList(uint32 *list);
 
 protected:
-	uint32 _numFiles;
-	FileEntry *_entry;
+	std::unordered_map<uint32, FileEntry> _entries;
 	FILE *_fp;
-
-	uint32 getFileSize(uint32 filenum);
-	FileEntry *getEntry(uint32 filenum);
 
 	uint16 _buildList[MAX_FILES_IN_LIST];
 	uint32 _loadedFilesList[MAX_FILES_IN_LIST];
