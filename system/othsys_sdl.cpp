@@ -746,11 +746,10 @@ void OtherSystem_SDL::startMusic(int section, int song) {
 		_musicSong = song;
 	}
 
-	//fade out
-	if(Mix_PlayingMusic()) {
+	//fade out and clear
+	if(Mix_PlayingMusic())
 		Mix_FadeOutMusic(250);
-		stopMusic();
-	}
+	stopMusic();
 
 	//handle dupes
 	if ((section == 2 && song == 1) || (section == 5 && song == 1)) {
@@ -794,6 +793,7 @@ void OtherSystem_SDL::startMusic(int section, int song) {
 void OtherSystem_SDL::stopMusic() {
 	Mix_HaltMusic();
 	Mix_FreeMusic(_music);
+	_music = nullptr;
 }
 
 bool OtherSystem_SDL::isMusicPlaying() const {
