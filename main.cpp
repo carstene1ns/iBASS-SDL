@@ -79,6 +79,12 @@ extern "C" {
 		panelMgr->ChangePanel(Panel::Control);
 	}
 
+	void CPP_endMovie() {
+		// TODO: skipping the movie here
+
+		panelMgr->ChangePanel(Panel::Start);
+	}
+
 	void CPP_startHelpPanel() {
 		//stop the game doing much
 		//Sky::g_engine->pauseEngine();

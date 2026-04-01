@@ -33,8 +33,9 @@
 - Make frame-rate independent, currently the gui stutters when the engine runs
   at native 12fps, this will also be needed for "fast mode"
   (see `SkyEngine::runGameCycle()`)
-- Inventory is maximum 11 objects in iBASS it seems, investigate if scrolling is
-  needed somewhere.
+- Inventory is maximum 16 objects in iBASS it seems, BASS allows up to 11 icons
+  in item bar. Investigate why in iBASS there is a hack to remove two icons in
+  linc space.
 
 ## SDL Port
 

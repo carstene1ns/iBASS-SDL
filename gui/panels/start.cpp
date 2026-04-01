@@ -60,7 +60,7 @@ void CPanelStart::show() {
 void CPanelStart::newGame() {
 	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
 
-	// TODO: skiping the movie here
+	// TODO: skipping the movie here
 
 	_mgr->PopPanel();
 	Sky::g_engine->unPauseEngine();
