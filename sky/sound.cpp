@@ -31,8 +31,8 @@
 #include "sky/sound.h"
 #include "sky/struc.h"
 
-#include "sound/audiostream.h"
-#include "sound/decoders/raw.h"
+//#include "sound/audiostream.h"
+//#include "sound/decoders/raw.h"
 
 namespace Sky {
 
