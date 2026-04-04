@@ -109,11 +109,11 @@ class SaveLoad {
 public:
 	SaveLoad(Screen *screen, Disk *disk, Mouse *mouse, Text *text, Music *music, Logic *logic, Sound *sound, SkyCompact *skyCompact, OSystem *system);
 	~SaveLoad();
-	void restartGame(void);
-	//void doAutoSave(void);
-	bool loadSaveAllowed(void);
+	void restartGame();
+	//void doAutoSave();
+	bool loadSaveAllowed();
 
-	//bool autoSaveExists(void);
+	//bool autoSaveExists();
 	bool saveGameToFile(uint16 selectedGame);
 	bool restoreGameFromFile(uint16 selectedGame);
 

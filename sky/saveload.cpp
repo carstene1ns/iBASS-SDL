@@ -67,7 +67,7 @@ SaveLoad::~SaveLoad() {
 }
 //----------------------------------------------------------------------------------------------------------------------------------
 /*
-bool SaveLoad::autoSaveExists(void) {
+bool SaveLoad::autoSaveExists() {
 	bool test = false;
 	char fName[20];
 	strcpy(fName, "SKY-VM.000");
@@ -347,7 +347,7 @@ void	SaveLoad::setSlotAscii(int slot, const char *ascii)//tony4june09
 
 
 //----------------------------------------------------------------------------------------------------------------------------------
-bool SaveLoad::loadSaveAllowed(void) {
+bool SaveLoad::loadSaveAllowed() {
 	if (SkyEngine::_systemVars.systemFlags & SF_CHOOSING)
 		return false; // texts get lost during load/save, so don't allow it during choosing
 	if (Logic::_scriptVariables[SCREEN] >= 101)
@@ -392,7 +392,7 @@ void	SaveLoad::setTwitterPassword(const char *ascii)//tony6aug09
 
 
 /*
-void SaveLoad::doAutoSave(void) {
+void SaveLoad::doAutoSave() {
 	char fName[20];
 	strcpy(fName, "SKY-VM.000");
 
@@ -762,7 +762,7 @@ bool SaveLoad::restoreGameFromFile(uint16 selectedGame) {
 	return true; //res;
 }
 
-void SaveLoad::restartGame(void) {
+void SaveLoad::restartGame() {
 	if (SkyEngine::_systemVars.gameVersion <= 267)
 		return; // no restart for floppy demo
 

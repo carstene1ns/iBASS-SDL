@@ -59,7 +59,7 @@
 namespace Sky {
 
 		extern "C"	void CPP_startStartPanel(bool	movies);
-		extern "C"	void CPP_startDeathPanel(void);
+		extern "C"	void CPP_startDeathPanel();
 		extern "C"	void CPP_endMovie();
 		extern "C"	bool	CPP_appIsPaused();
 

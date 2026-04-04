@@ -167,7 +167,7 @@ protected:
 	void loadFixedItems();
 
 	bool _shouldQuit;
-	bool shouldQuit(void) const { return _shouldQuit; }	//from Engine base class
+	bool shouldQuit() const { return _shouldQuit; }	//from Engine base class
 
 	OSystem *_system;	//normally this would be in the Engine base class
 };

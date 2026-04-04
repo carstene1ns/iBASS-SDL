@@ -60,12 +60,12 @@ void Music::startMusic(int song, bool forcePlay) {
 	}
 }
 
-void Music::stopMusic(void) {
+void Music::stopMusic() {
 	_currentMusic = 0;
 	_system->stopMusic();
 }
 
-int Music::giveCurrentMusic(void) const {
+int Music::giveCurrentMusic() const {
 	return _currentMusic;
 }
 
