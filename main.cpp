@@ -48,12 +48,6 @@ namespace {
 	std::unique_ptr<CPanelMan> panelMgr;
 	float scale = 3.0f;
 	SDL_Rect windowRect = {0};
-
-	uint32_t gameTickCallback(uint32_t interval, void */*param*/) {
-		Sky::g_engine->gotTimerTick();
-
-		return 1000 / 50;
-	}
 }
 
 extern "C" {
@@ -126,8 +120,6 @@ void mainLoop() {
 	bool res = engine->init();
 	assert(res);
 
-	auto gameTick = SDL_AddTimer(1000 / 50, gameTickCallback, nullptr);
-
 	if(splash)
 		SDL_DestroyTexture(splash);
 
@@ -187,14 +179,12 @@ void mainLoop() {
 		SDL_RenderPresent(renderer);
 	}
 
-	SDL_RemoveTimer(gameTick);
-
 	panelMgr.reset(); // delete all panels before gui destruction
 }
 
 bool startSDL() {
 	// main library
-	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO|SDL_INIT_TIMER) != 0)
+	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
 		return false;
 	auto sg_sdl = sg::make_scope_guard([]() noexcept { SDL_Quit(); });
 

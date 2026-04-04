@@ -29,6 +29,7 @@ enum Error {
 }
 
 [[noreturn]] void error(const char *message, ...) [[gnu::format(printf, 1, 2)]];
+void debug(const char *s, ...) [[gnu::format(printf, 1, 2)]];
 void debug(int level, const char *message, ...) [[gnu::format(printf, 2, 3)]];
 void warning(const char *message, ...) [[gnu::format(printf, 1, 2)]];
 

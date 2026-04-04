@@ -80,7 +80,7 @@ Screen::Screen(OSystem *pSystem, Disk *pDisk, SkyCompact *skyCompact) {
 	}
 
 	//set the palette
-	_system->getPaletteManager()->setPalette(tmpPal, 0, VGA_COLORS);
+	_system->setPalette(tmpPal, 0, VGA_COLORS);
 	_currentPalette = 0;
 
 	_seqInfo.nextFrame = _seqInfo.framesLeft = 0;
@@ -108,7 +108,7 @@ void Screen::setFocusRectangle(const Common::Rect& rect) {
 //set a new palette, pal is a pointer to dos vga rgb components 0..63
 void Screen::setPalette(uint8 *pal) {
 	convertPalette(pal, _palette);
-	_system->getPaletteManager()->setPalette(_palette, 0, GAME_COLORS);
+	_system->setPalette(_palette, 0, GAME_COLORS);
 	_system->updateScreen();
 }
 
@@ -121,7 +121,7 @@ void Screen::setPaletteEndian(uint8 *pal) {
 #else
 	convertPalette(pal, _palette);
 #endif
-	_system->getPaletteManager()->setPalette(_palette, 0, GAME_COLORS);
+	_system->setPalette(_palette, 0, GAME_COLORS);
 	_system->updateScreen();
 }
 
@@ -133,7 +133,7 @@ void Screen::halvePalette() {
 		halfPalette[cnt * 3 + 1] = _palette[cnt * 3 + 1] >> 1;
 		halfPalette[cnt * 3 + 2] = _palette[cnt * 3 + 2] >> 1;
 	}
-	_system->getPaletteManager()->setPalette(halfPalette, 0, GAME_COLORS);
+	_system->setPalette(halfPalette, 0, GAME_COLORS);
 }
 
 void Screen::setPalette(uint16 fileNum) {
@@ -257,7 +257,7 @@ void Screen::fnFadeDown(uint32 scroll) {
 		for (uint8 cnt = 0; cnt < 32; cnt++) {
 			delayTime += 20;
 			palette_fadedown_helper(_palette, GAME_COLORS);
-			_system->getPaletteManager()->setPalette(_palette, 0, GAME_COLORS);
+			_system->setPalette(_palette, 0, GAME_COLORS);
 			_system->updateScreen();
 			int32 waitTime = (int32)delayTime - _system->getMillis();
 			if (waitTime < 0)
@@ -319,7 +319,7 @@ void Screen::paletteFadeUp(uint8 *pal) {
 			_palette[colCnt * 3 + 2] = (tmpPal[colCnt * 3 + 2] * cnt) >> 5;
 		}
 
-		_system->getPaletteManager()->setPalette(_palette, 0, GAME_COLORS);
+		_system->setPalette(_palette, 0, GAME_COLORS);
 		_system->updateScreen();
 
 		int32 waitTime = (int32)delayTime - _system->getMillis();

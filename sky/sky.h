@@ -103,8 +103,6 @@ public:
 	int		giveCurrentScreen();//tony16june09
 	void	initNewGame();//tony16june09
 
-	void gotTimerTick();	//for when we call it from an NSTimer
-
 	//hints viewed data - needs writing out ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#define	TOTAL_hint_answers	164
 	bool	answerSeen[TOTAL_hint_answers];
