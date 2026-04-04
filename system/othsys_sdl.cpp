@@ -219,13 +219,11 @@ SDL_Texture *OtherSystem_SDL::loadPNG(const char *filename) {
 
 OtherSystem_SDL::OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer) :
 	_window(window), _renderer(renderer) {
-	//allocate buffers
-	_offscreenBuf = (uint8 *)malloc(GAME_W * GAME_H);
-	_screenTexBuf = (uint32 *)malloc(GAME_W * GAME_H * 4);
+	//allocate and clear buffers
+	_offscreenBuf = (uint8 *)calloc(GAME_W * GAME_H, 1);
+	_screenTexBuf = (uint32 *)calloc(GAME_W * GAME_H, 4);
 
-	//clear all buffers
-	memset(_offscreenBuf, 0, GAME_W * GAME_H);
-	memset(_screenTexBuf, 0, GAME_W * GAME_H * 4);
+	//clear palette
 	memset(_pal32, 0, 256 * 4);
 
 	_gameScreenTexture = nullptr;
@@ -242,11 +240,26 @@ OtherSystem_SDL::OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer) :
 
 	initIcons();
 
+	// get scale hint
+	auto hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
+
+	// create game texture to upscale
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	_gameScreenTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA32,
 		SDL_TEXTUREACCESS_STREAMING, GAME_W, GAME_H);
 
+	// create big second texture to downscale from
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+	_arcTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA32,
+		SDL_TEXTUREACCESS_TARGET, GAME_ARC_W * SCALE_FACTOR_ARC_W,
+		GAME_ARC_H * SCALE_FACTOR_ARC_H);
+
 	_uiTexture = loadPNG("gui/ui.png");
 	_invTexture = loadPNG("gui/inv.png");
+
+	// restore scale hint
+	if(hint)
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, hint);
 
 	_invVisible = false;
 
@@ -261,8 +274,8 @@ OtherSystem_SDL::OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer) :
 		_winRect.w = w;
 		_winRect.h = h;
 
-		float xScale = w / GAME_W;
-		float yScale = h / GAME_H;
+		float xScale = w / GAME_ARC_W;
+		float yScale = h / GAME_ARC_H;
 
 		_scale = xScale > yScale ? yScale : xScale;
 	}
@@ -322,6 +335,7 @@ OtherSystem_SDL::~OtherSystem_SDL() {
 
 	SDL_DestroyTexture(_uiTexture);
 	SDL_DestroyTexture(_invTexture);
+	SDL_DestroyTexture(_arcTexture);
 	SDL_DestroyTexture(_gameScreenTexture);
 }
 
@@ -486,7 +500,7 @@ bool OtherSystem_SDL::pollEvent(Event *event) {
 	auto res = SDL_GetMouseState(&x, &y);
 	g_mouseDown = res & SDL_BUTTON(1);
 	g_xCoord = (x - _winRect.x) / _scale;
-	g_yCoord = (y - _winRect.y) / _scale;
+	g_yCoord = (y - _winRect.y) / (_scale * SCALE_FACTOR_ARC_Y);
 
 	if (prevCycleDown && !g_mouseDown) {
 		event->type = EVENT_LBUTTONUP;	//EVENT_RBUTTONUP
@@ -573,12 +587,27 @@ void OtherSystem_SDL::updateScreen() {
 		_needFullUpdate = false;
 	}
 
-	const int screenWidth = GAME_W * _scale;
-	const int screenHeight = GAME_H * _scale;
-	SDL_Rect dst = { _winRect.x, _winRect.y, screenWidth, screenHeight };
+	// save rendertarget
+	auto renderTarget = SDL_GetRenderTarget(_renderer);
 
+	// get game screen
 	SDL_UpdateTexture(_gameScreenTexture, nullptr, _screenTexBuf, GAME_W * 4);
-	SDL_RenderCopy(_renderer, _gameScreenTexture, nullptr, &dst);
+
+	// scale content up for aspect ratio correction
+	SDL_Rect src = { 0, 0, GAME_W, GAME_H };
+	int scaleW = (_scale + 1 > SCALE_FACTOR_ARC_W) ? SCALE_FACTOR_ARC_W : _scale + 1;
+	SDL_Rect tmp = { 0, 0, GAME_ARC_W * scaleW, GAME_ARC_H * SCALE_FACTOR_ARC_H };
+	SDL_SetRenderTarget(_renderer, _arcTexture);
+	SDL_RenderCopy(_renderer, _gameScreenTexture, &src, &tmp);
+
+	// restore render target
+	SDL_SetRenderTarget(_renderer, renderTarget);
+
+	// scale content down
+	const int screenWidth = GAME_ARC_W * _scale;
+	const int screenHeight = GAME_ARC_H * _scale;
+	SDL_Rect dst = { _winRect.x, _winRect.y, screenWidth, screenHeight };
+	SDL_RenderCopy(_renderer, _arcTexture, &tmp, &dst);
 
 	if (_invVisible) {
 		drawInvBackground();

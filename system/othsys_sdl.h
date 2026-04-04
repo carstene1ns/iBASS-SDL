@@ -36,13 +36,14 @@ enum {
 };
 
 #define GAME_W 320
-#define GAME_H 200
+#define GAME_H 192
+#define GAME_ARC_W GAME_W
+#define GAME_ARC_H 230 // 4/3 aspect ratio corrected: (192*6/5)
+#define SCALE_FACTOR_ARC_W 5
+#define SCALE_FACTOR_ARC_H 6
+#define SCALE_FACTOR_ARC_Y GAME_ARC_H / GAME_H
 
 #define	MAX_NUM_SFX	30
-
-#ifndef MAX_PATH
-#define MAX_PATH 256
-#endif
 
 #define MAX_FRAMES	16	//maximum number of frames per animation
 
@@ -76,7 +77,7 @@ struct Icon {
 
 	void set(int xPos, int yPos, float alphaVal = 1.0f) {
 		x = xPos;
-		y = yPos;
+		y = yPos * SCALE_FACTOR_ARC_Y;
 		visible = true;
 		alpha = alphaVal;
 	}
@@ -212,9 +213,9 @@ public:
 
 	void showInventory(int x1, int y1, int x2, int y2) {
 		_invX1 = x1;
-		_invY1 = y1;
+		_invY1 = y1 * SCALE_FACTOR_ARC_Y;
 		_invX2 = x2;
-		_invY2 = y2;
+		_invY2 = y2 * SCALE_FACTOR_ARC_Y;
 		_invVisible = true;
 	}
 
@@ -289,6 +290,7 @@ protected:
 
 	//texture handles
 	SDL_Texture *_gameScreenTexture;
+	SDL_Texture *_arcTexture;
 	SDL_Texture *_uiTexture;
 	SDL_Texture *_invTexture;
 

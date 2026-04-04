@@ -93,13 +93,14 @@ extern "C" {
 }
 
 void updateWinAndScale() {
-	float xScale = windowRect.w / (float)GAME_W;
-	float yScale = windowRect.h / (float)GAME_H;
+	// use lower value to make sure everything fits
+	float xScale = windowRect.w / (float)GAME_ARC_W;
+	float yScale = windowRect.h / (float)GAME_ARC_H;
 	scale = xScale > yScale ? yScale : xScale;
 	assert(scale > 0 && "invalid scale");
 
-	const int screenWidth = GAME_W * scale;
-	const int screenHeight = GAME_H * scale;
+	const int screenWidth = GAME_ARC_W * scale;
+	const int screenHeight = GAME_ARC_H * scale;
 	windowRect.x = (windowRect.w - screenWidth) / 2;
 	windowRect.y = (windowRect.h - screenHeight) / 2;
 }
@@ -265,7 +266,9 @@ int main(int argc, char *argv[]) {
 
 	srand((unsigned)time(nullptr));
 
-	windowRect = { 0, 0, (int)(GAME_W * scale), (int)(GAME_H * scale)};
+	windowRect = { 0 };
+	windowRect.w = GAME_ARC_W * scale;
+	windowRect.h = GAME_ARC_H * scale;
 
 	if(!startSDL()) {
 		printf("Failed to initialize!\n");

@@ -39,7 +39,7 @@
 
 ## SDL Port
 
-- Aspect ratio correction: scale height nearest neigbor by 6 and then downscale
-  bilinear down to render size
+- ~~Aspect ratio correction: scale height nearest neigbor by 6 and then downscale
+  bilinear down to render size~~
 - Render ingame touch gui outside game canvas, if screen is wide enough
 - Restore compatibility with big endian platforms
