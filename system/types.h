@@ -20,38 +20,33 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+#include <cstdint>
 
 #define MAX_PATH       512
 
-#include <zlib.h>
-
 #include "system/common.h"
 
-typedef 	signed char 	int8;
-typedef 	unsigned char 	uint8;
-typedef		unsigned char	byte;
+typedef int8_t int8;
+typedef uint8_t uint8;
+typedef int16_t int16;
+typedef uint16_t uint16;
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int64_t int64;
+typedef uint64_t uint64;
 
-typedef 	signed short 	int16;
-typedef 	unsigned short 	uint16;
-
-typedef		signed int	int32;
-typedef		unsigned int	uint32;
-
-typedef		long long	int64;
-typedef		unsigned long long	uint64;
-
-typedef		unsigned int uint;
+typedef uint8_t byte;
+typedef unsigned int uint;
 
 #ifdef __GNUC__
 #define GCC_PACK __attribute__((packed))
 #else
-#define	GCC_PACK
+#define GCC_PACK
 #endif
 
 #define ARRAYSIZE(x) ((int)(sizeof(x) / sizeof(x[0])))

@@ -54,3 +54,4 @@ These are additionally included when linking statically:
 
 * [SDL2 and mixer](https://libsdl.org/) - zlib
 * TGUI - zlib
+* [zlib](https://zlib.net) - zlib

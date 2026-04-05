@@ -87,41 +87,41 @@ struct Icon {
 class OtherSystem_SDL : public OtherSystem {
 public:
 	OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer);
-	virtual ~OtherSystem_SDL();
+	~OtherSystem_SDL();
 
-	virtual void setPalette(const uint8 *colors, int start, int num);
-	virtual bool pollEvent(Event *event);
-	virtual void copyRectToScreen(const uint8 *buf, int pitch, int x, int y, int w, int h);
-	virtual void updateScreen();
-	virtual uint32 getMillis();
-	virtual void delayMillis(uint32 msecs);
+	void setPalette(const uint8 *colors, int start, int num) override;
+	bool pollEvent(Event *event) override;
+	void copyRectToScreen(const uint8 *buf, int pitch, int x, int y, int w, int h) override;
+	void updateScreen() override;
+	uint32 getMillis() override;
+	void delayMillis(uint32 msecs) override;
 
 	void fullTextureUpdate();
 	void updateWindow(SDL_Rect window, float scale);
 
-	virtual void startMusic(int section, int song);
-	virtual void stopMusic();
-	virtual bool isMusicPlaying() const;
-	virtual void setMusicVolume(float volume);
-	virtual float getMusicVolume() const;
+	void startMusic(int section, int song) override;
+	void stopMusic() override;
+	bool isMusicPlaying() const override;
+	void setMusicVolume(float volume) override;
+	float getMusicVolume() const override;
 
-	virtual void playSpeech(void *mem, int size);
-	virtual void stopSpeech();
-	virtual bool isSpeechPlaying() const;
-	virtual void setSpeechVolume(float volume);
-	virtual float getSpeechVolume() const;
+	void playSpeech(void *mem, int size) override;
+	void stopSpeech() override;
+	bool isSpeechPlaying() const override;
+	void setSpeechVolume(float volume) override;
+	float getSpeechVolume() const override;
 
-	virtual void loadSFXSection(int section);
-	virtual void playSFX(int section, int sound, int chan, float volume, bool loop);
-	virtual void stopSFX(int chan);
-	virtual bool isSFXPlaying(int chan) const;
-	virtual void setSFXVolume(float volume);
-	virtual float getSFXVolume() const;
-	virtual void pauseAudioForMenu(bool pause, bool playMenuMusic = true);
-	virtual void playUISFX(int num);
-	virtual void clearPauseFlag();
+	void loadSFXSection(int section) override;
+	void playSFX(int section, int sound, int chan, float volume, bool loop) override;
+	void stopSFX(int chan) override;
+	bool isSFXPlaying(int chan) const override;
+	void setSFXVolume(float volume) override;
+	float getSFXVolume() const override;
+	void pauseAudioForMenu(bool pause, bool playMenuMusic = true) override;
+	void playUISFX(int num) override;
+	void clearPauseFlag() override;
 
-	virtual void quit() const;
+	void quit() const override;
 
 	void setDragIconDrawOffset(int x, int y);
 
@@ -229,7 +229,7 @@ public:
 		_dragIcon.cur_frame = highlighted ? 1 : 0;
 	}
 
-	virtual void clearDragIcon() {
+	void clearDragIcon() {
 		_dragIcon.visible = false;
 	}
 

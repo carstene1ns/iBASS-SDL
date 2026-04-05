@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.22...4.3 FATAL_ERROR)
 
-project(iBASS-SDL VERSION 0.2.0 LANGUAGES CXX
+project(iBASS-SDL VERSION 0.2.1 LANGUAGES CXX
 	DESCRIPTION "Beneath A Steel Sky: Remastered (SDL)"
 	HOMEPAGE_URL "")
 set(PROJECT_BUGREPORT "https://github.com/carstene1ns/iBASS-SDL/issues")
 
-set(CMAKE_C_STANDARD 14)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # set build type to debug, if not set
 if(NOT CMAKE_BUILD_TYPE)

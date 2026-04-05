@@ -24,6 +24,7 @@
 
 
 #include "common/file.h"
+#include <zlib.h>
 
 #include "sky/disk.h"
 #include "sky/sky.h"
