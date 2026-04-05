@@ -28,6 +28,14 @@
 #include "system/othsys.h"
 //#include "sky/struc.h"	//MegaSet
 
+/**
+ * This is the namespace of the Sky engine.
+ *
+ * Status of this engine: ???
+ *
+ * Supported games:
+ * - ???
+ */
 namespace Sky {
 
 struct SystemVars {

@@ -31,6 +31,9 @@
 #include "sky/sound.h"
 #include "sky/struc.h"
 
+//#include "sound/audiostream.h"
+//#include "sound/decoders/raw.h"
+
 namespace Sky {
 
 #define SOUND_FILE_BASE 60203
@@ -1112,8 +1115,7 @@ Sound::Sound(Disk *pDisk, OtherSystem *pSystem, uint8 pVolume) {
 }
 
 Sound::~Sound() {
-	if (_soundData)
-		free(_soundData);
+	free(_soundData);
 
 	delete _speechFS;
 }
@@ -1131,8 +1133,7 @@ void Sound::loadSection(uint8 pSection) {
 
 	g_section = pSection;
 
-	if (_soundData)
-		free(_soundData);
+	free(_soundData);
 	_soundData = _skyDisk->loadFile(pSection * 4 + SOUND_FILE_BASE);
 	uint16 asmOfs;
 	if (SkyEngine::_systemVars.gameVersion == 109) {
@@ -1195,19 +1196,24 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	dataOfs += _sfxBaseOfs;
 
 #if 0
-	byte flags = Audio::Mixer::FLAG_UNSIGNED;
+	Audio::SeekableAudioStream *stream = Audio::makeRawStream(_soundData + dataOfs, dataSize, sampleRate,
+	                                                                Audio::FLAG_UNSIGNED, DisposeAfterUse::NO);
 
-	uint32 loopSta = 0, loopEnd = 0;
+	Audio::AudioStream *output = 0;
 	if (dataLoop) {
-		loopSta = dataSize - dataLoop;
-		loopEnd = dataSize;
-		flags |= Audio::Mixer::FLAG_LOOP;
+		uint32 loopSta = dataSize - dataLoop;
+		uint32 loopEnd = dataSize;
+
+		output = Audio::makeLoopingAudioStream(stream, Audio::Timestamp(0, loopSta, sampleRate),
+		                                       Audio::Timestamp(0, loopEnd, sampleRate), 0);
+	} else {
+		output = stream;
 	}
 
 	if (channel == 0)
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound0, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH0, volume, 0, loopSta, loopEnd);
+		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound0, output, SOUND_CH0, volume, 0);
 	else
-		_mixer->playRaw(Audio::Mixer::kSFXSoundType, &_ingameSound1, _soundData + dataOfs, dataSize, sampleRate, flags, SOUND_CH1, volume, 0, loopSta, loopEnd);
+		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound1, output, SOUND_CH1, volume, 0);
 #endif
 	_system->playSFX(g_section, sound, channel & 1, (float)volume / 255.0f, dataLoop != 0);
 }

@@ -100,7 +100,52 @@ void SkyEngine::initVirgin() {
 }
 //--------------------------------------------------------------------------------------------------------------
 
+// TODO: eventmanager
 void SkyEngine::handleKey() {
+#if 0
+        if (_keyPressed.keycode && _systemVars.paused) {
+                _skySound->fnUnPauseFx();
+                _systemVars.paused = false;
+                _skyScreen->setPaletteEndian((uint8 *)_skyCompact->fetchCpt(SkyEngine::_systemVars.currentPalette));
+        } else if (_keyPressed.hasFlags(Common::KBD_CTRL)) {
+                if (_keyPressed.keycode == Common::KEYCODE_f)
+                        _fastMode ^= 1;
+                else if (_keyPressed.keycode == Common::KEYCODE_g)
+                        _fastMode ^= 2;
+                else if (_keyPressed.keycode == Common::KEYCODE_d)
+                        _debugger->attach();
+        } else if (_keyPressed.keycode) {
+                switch (_keyPressed.keycode) {
+                case Common::KEYCODE_BACKQUOTE:
+                case Common::KEYCODE_HASH:
+                        _debugger->attach();
+                        break;
+                case Common::KEYCODE_F5:
+                        _skyControl->doControlPanel();
+                        break;
+
+                case Common::KEYCODE_ESCAPE:
+                        if (!_systemVars.pastIntro)
+                                _skyControl->restartGame();
+                        break;
+
+                case Common::KEYCODE_PERIOD:
+                        _skyMouse->logicClick();
+                        break;
+
+                case Common::KEYCODE_p:
+                        _skyScreen->halvePalette();
+                        _skySound->fnPauseFx();
+                        _systemVars.paused = true;
+                        break;
+
+                default:
+                        break;
+                }
+        }
+        _keyPressed.reset();
+#endif
+// iBASS
         if ((_key_pressed == 27) && (!_systemVars.pastIntro)) {
                 _saveLoad->restartGame();
         }
