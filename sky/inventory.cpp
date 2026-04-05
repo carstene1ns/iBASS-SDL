@@ -217,7 +217,6 @@ void	Logic::KillInventory()//tony26april09
 {
 	//shut down displayed inv objects
 
-	int	j;
 	Compact *itemData;
 
 //	printf("KillMenu len %d\n\n\n",_scriptVariables[MENU_LENGTH]);
@@ -228,7 +227,7 @@ void	Logic::KillInventory()//tony26april09
 		//an sfx
 		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
 
-		for (j=0;j<_scriptVariables[MENU_LENGTH];j++)
+		for (size_t j=0;j<_scriptVariables[MENU_LENGTH];j++)
 		{
 	//		printf(" Kill %d\n",_objectList[j]);
 			//fetch the compact
