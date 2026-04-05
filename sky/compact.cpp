@@ -24,12 +24,13 @@
 #include "common/file.h"
 #include "sky/compact.h"
 //#include "gui/message.h"
+#include <stddef.h>	// for ptrdiff_t
 
 namespace Sky {
 
 #define	SKY_CPT_SIZE	419427
 
-#define OFFS(type,item) (((long)(&((type*)0)->item)))
+#define OFFS(type,item) (((ptrdiff_t)(&((type*)42)->item))-42)
 #define MK32(type,item) OFFS(type, item),0,0,0
 #define MK16(type,item) OFFS(type, item),0
 #define MK32_A5(type, item) MK32(type, item[0]), MK32(type, item[1]), \
@@ -119,7 +120,7 @@ static const uint32 turnTableOffsets[] = {
 #define MEGASET_SIZE (sizeof(megaSetOffsets)/sizeof(uint32))
 #define TURNTABLE_SIZE (sizeof(turnTableOffsets)/sizeof(uint32))
 
-SkyCompact::SkyCompact(void) {
+SkyCompact::SkyCompact() {
 	_cptFile = new Common::File();
 	if (!_cptFile->open("sky.cpt")) {
 		//GUI::MessageDialog dialog("Unable to find \"sky.cpt\" file!\n"
@@ -233,7 +234,7 @@ SkyCompact::SkyCompact(void) {
 	_resetDataPos = _cptFile->pos();
 }
 
-SkyCompact::~SkyCompact(void) {
+SkyCompact::~SkyCompact() {
 	free(_rawBuf);
 	free(_asciiBuf);
 	free(_saveIds);
@@ -455,7 +456,7 @@ uint16 SkyCompact::findCptId(const char *cptName) {
 	return 0;
 }
 
-uint16 SkyCompact::giveNumDataLists(void) {
+uint16 SkyCompact::giveNumDataLists() {
 	return _numDataLists;
 }
 

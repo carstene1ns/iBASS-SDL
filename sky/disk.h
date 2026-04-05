@@ -44,7 +44,7 @@ struct FileEntry {
 class Disk {
 public:
 	Disk();
-	~Disk(void);
+	~Disk();
 
 	uint8 *loadFile(uint16 fileNr);
 	uint16 *loadScriptFile(uint16 fileNr);

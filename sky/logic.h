@@ -146,7 +146,7 @@ public:
 		Music *skyMusic,
 		Mouse *skyMouse,
 		Sound *skySound);
-	~Logic(void);
+	~Logic();
 	void engine();
 	void useControlInstance(Control *control) { _skyControl = control; }
 
@@ -156,7 +156,7 @@ public:
 	Grid *_skyGrid;
 
 	uint16 script(uint16 scriptNo, uint16 offset);
-	void initScreen0(void);
+	void initScreen0();
 	void parseSaveData(uint32 *data);
 
 	void	Start_inventory(uint32	highlightedId=0);//tony23april2009
@@ -180,7 +180,7 @@ protected:
 	void mainAnim();
 	void runGetOff();
 	void stopAndWait();
-	bool checkProtection(void);
+	bool checkProtection();
 
 	void nop();
 	void logicScript();

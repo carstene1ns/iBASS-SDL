@@ -74,7 +74,7 @@ Text::Text(Disk *skyDisk, SkyCompact *skyCompact) {
 	}
 }
 
-Text::~Text(void) {
+Text::~Text() {
 	for (int i = FIRST_TEXT_BUFFER; i <= LAST_TEXT_BUFFER; i++)
 		if (SkyEngine::_itemList[i]) {
 			free(SkyEngine::_itemList[i]);
@@ -318,7 +318,7 @@ DisplayedText Text::displayText(char *textPtr, uint8 *dest, bool centre, uint16 
 
 		if (pixelWidth <= lineWidth) {
 			if (*(lastSpace-1) == 10)
-				error("line width exceeded!");
+				error("line width exceeded");
 
 			*(lastSpace-1) = 10;
 			lineWidth = 0;
@@ -335,7 +335,7 @@ DisplayedText Text::displayText(char *textPtr, uint8 *dest, bool centre, uint16 
 	numLines++;
 
 	if (numLines > MAX_NO_LINES)
-		error("Maximum no. of lines exceeded!");
+		error("Maximum no. of lines exceeded");
 
 	uint32 dtLineSize = pixelWidth * _charHeight;
 	uint32 numBytes = (dtLineSize * numLines) + sizeof(DataFileHeader) + 4;
@@ -378,7 +378,7 @@ DisplayedText Text::displayText(char *textPtr, uint8 *dest, bool centre, uint16 
 	} while (textChar >= 10);
 
 	DisplayedText ret;
-	ret.compactNum = 0;
+	memset(&ret, 0, sizeof(ret));
 	ret.textData = dest;
 	ret.textWidth = dtLastWidth;
 	return ret;
@@ -456,7 +456,7 @@ void Text::changeTextSpriteColour(uint8 *sprData, uint8 newCol) {
 			sprData[cnt] = newCol;
 }
 
-uint32 Text::giveCurrentCharSet(void) {
+uint32 Text::giveCurrentCharSet() {
 	return _curCharSet;
 }
 
@@ -465,6 +465,7 @@ void Text::initHuffTree() {
 	case 109:
 		_huffTree = _huffTree_00109;
 		break;
+	case 272: // FIXME: Extract data
 	case 267:
 		_huffTree = _huffTree_00267;
 		break;

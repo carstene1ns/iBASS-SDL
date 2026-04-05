@@ -94,7 +94,7 @@ Logic::Logic(SkyCompact *skyCompact, Screen *skyScreen, Disk *skyDisk, Text *sky
 	_liveInv=false;
 }
 
-Logic::~Logic(void) {
+Logic::~Logic() {
 	delete _skyGrid;
 	delete _skyAutoRoute;
 
@@ -103,7 +103,7 @@ Logic::~Logic(void) {
 			free(_moduleList[i]);
 }
 
-void Logic::initScreen0(void) {
+void Logic::initScreen0() {
 	fnEnterSection(0, 0, 0);
 	_skyMusic->startMusic(2);
 	SkyEngine::_systemVars.currentMusic = 2;
@@ -117,7 +117,7 @@ void Logic::parseSaveData(uint32 *data) {
 	fnEnterSection(_scriptVariables[CUR_SECTION], 0, 0);
 }
 
-bool Logic::checkProtection(void) {
+bool Logic::checkProtection() {
 	if (_scriptVariables[ENTER_DIGITS]) {
 		if (_scriptVariables[CONSOLE_TYPE] == 5) // reactor code
 			_scriptVariables[FS_COMMAND] = 240;
@@ -1257,7 +1257,6 @@ script:
 	/// low level interface to interpreter
 
 	uint16 moduleNo = scriptNo >> 12;
-	debug(3, "Doing Script %x", (offset << 16) | scriptNo);
 	uint16 *scriptData = _moduleList[moduleNo]; // get module address
 
 	if (!scriptData) { // We need to load the script module
@@ -1280,11 +1279,13 @@ script:
 		offset = 14408;
 	}
 
+	debug(3, "Doing Script: %d:%d:%x", moduleNo, scriptNo & 0xFFF, offset ? (offset - moduleStart[scriptNo & 0xFFF]) : 0);
+
 	// Check whether we have an offset or what
 	if (offset)
 		scriptData = moduleStart + offset;
 	else
-		scriptData += scriptData[scriptNo & 0x0fff];
+		scriptData += scriptData[scriptNo & 0x0FFF];
 
 	//iBASS: gameplay hacks
 	if (!offset) {
@@ -2336,7 +2337,7 @@ bool Logic::fnEyeball(uint32 id, uint32 b, uint32 c) {
 
 bool Logic::fnLeaveSection(uint32 sectionNo, uint32 b, uint32 c) {
 	//if (SkyEngine::isDemo())
-	//	_skyControl->showGameQuitMsg();
+	//	Engine::quitGame();
 
 	if (sectionNo == 5) //linc section - has different mouse icons
 		_skyMouse->replaceMouseCursors(60301);

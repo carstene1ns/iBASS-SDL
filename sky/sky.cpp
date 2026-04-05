@@ -59,7 +59,7 @@
 namespace Sky {
 
 		extern "C"	void CPP_startStartPanel(bool	movies);
-		extern "C"	void CPP_startDeathPanel(void);
+		extern "C"	void CPP_startDeathPanel();
 		extern "C"	void CPP_endMovie();
 		extern "C"	bool	CPP_appIsPaused();
 
@@ -100,7 +100,7 @@ void SkyEngine::initVirgin() {
 }
 //--------------------------------------------------------------------------------------------------------------
 
-void SkyEngine::handleKey(void) {
+void SkyEngine::handleKey() {
         if ((_key_pressed == 27) && (!_systemVars.pastIntro)) {
                 _saveLoad->restartGame();
         }
@@ -263,7 +263,15 @@ bool SkyEngine::runGameCycle() {
 
 			_skyScreen->recreate();
 			_skyScreen->spriteEngine();
-
+#if 0
+			if (_debugger->showGrid()) {
+				uint8 *grid = _skyLogic->_skyGrid->giveGrid(Logic::_scriptVariables[SCREEN]);
+				if (grid) {
+					_skyScreen->showGrid(grid);
+					_skyScreen->forceRefresh();
+				}
+			}
+#endif
 			_skyScreen->flip();
 		}//if !paused
 
@@ -299,7 +307,7 @@ void SkyEngine::initItemList() {
 		_itemList[i] = NULL;
 }
 
-void SkyEngine::loadFixedItems(void) {
+void SkyEngine::loadFixedItems() {
 	_itemList[49] = _skyDisk->loadFile(49);
 	_itemList[50] = _skyDisk->loadFile(50);
 	_itemList[73] = _skyDisk->loadFile(73);
@@ -327,7 +335,7 @@ uint32 SkyEngine::timerHandler(uint32 interval, void *refCon) {
         return 1000 / 50;
 }
 
-void SkyEngine::gotTimerTick(void) {
+void SkyEngine::gotTimerTick() {
 	_skyScreen->handleTimer();
 }
 
@@ -383,6 +391,8 @@ void SkyEngine::delay(int32 amount) {
 					}
                 }
 
+		_system->updateScreen();
+
                 if (amount > 0)
                         _system->delayMillis((amount > 10) ? 10 : amount);
         }
@@ -391,11 +401,12 @@ void SkyEngine::delay(int32 amount) {
 
 }
 
-bool SkyEngine::isDemo(void) {
+bool SkyEngine::isDemo() {
 	switch (_systemVars.gameVersion) {
-	case 109: // pc gamer demo
-	case 267: // floppy demo
-	case 365: // cd demo
+	case 109: // PC Gamer demo
+	case 267: // English floppy demo
+	case 272: // German floppy demo
+	case 365: // CD demo
 		return true;
 	case 288:
 	case 303:
@@ -410,10 +421,11 @@ bool SkyEngine::isDemo(void) {
 	}
 }
 
-bool SkyEngine::isCDVersion(void) {
+bool SkyEngine::isCDVersion() {
 	switch (_systemVars.gameVersion) {
 	case 109:
 	case 267:
+	case 272:
 	case 288:
 	case 303:
 	case 331:

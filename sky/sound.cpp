@@ -1111,7 +1111,7 @@ Sound::Sound(Disk *pDisk, OtherSystem *pSystem, uint8 pVolume) {
 	_speechFS = new SpeechFileSystem;
 }
 
-Sound::~Sound(void) {
+Sound::~Sound() {
 	if (_soundData)
 		free(_soundData);
 
@@ -1146,7 +1146,7 @@ void Sound::loadSection(uint8 pSection) {
 	if ((_soundData[asmOfs] != 0x3C) || (_soundData[asmOfs + 0x27] != 0x8D) ||
 		(_soundData[asmOfs + 0x28] != 0x1E) || (_soundData[asmOfs + 0x2F] != 0x8D) ||
 		(_soundData[asmOfs + 0x30] != 0x36))
-			error("Unknown sounddriver version!");
+			error("Unknown sounddriver version");
 
 	_soundsTotal = _soundData[asmOfs + 1];
 	uint16 sRateTabOfs = READ_LE_UINT16(_soundData + asmOfs + 0x29);
@@ -1264,7 +1264,7 @@ void Sound::fnStartFx(uint32 sound, uint8 channel) {
 	playSound(sfx->soundNo, volume, channel);
 }
 
-void Sound::checkFxQueue(void) {
+void Sound::checkFxQueue() {
 	for (uint8 cnt = 0; cnt < MAX_QUEUED_FX; cnt++) {
 		if (_sfxQueue[cnt].count) {
 			_sfxQueue[cnt].count--;
@@ -1274,7 +1274,7 @@ void Sound::checkFxQueue(void) {
 	}
 }
 
-void Sound::restoreSfx(void) {
+void Sound::restoreSfx() {
 	// queue sfx, so they will be started when the player exits the control panel
 	memset(_sfxQueue, 0, sizeof(_sfxQueue));
 	uint8 queueSlot = 0;
@@ -1293,14 +1293,14 @@ void Sound::restoreSfx(void) {
 	}
 }
 
-void Sound::fnStopFx(void) {
+void Sound::fnStopFx() {
 	_system->stopSFX(0);
 	_system->stopSFX(1);
 
 	_saveSounds[0] = _saveSounds[1] = 0xFFFF;
 }
 
-void Sound::stopSpeech(void) {
+void Sound::stopSpeech() {
 	_system->stopSpeech();
 
 }
@@ -1320,11 +1320,11 @@ bool Sound::startSpeech(uint16 textNum) {
 }
 
 
-bool Sound::speechFinished(void) {
+bool Sound::speechFinished() {
 	return !_system->isSpeechPlaying();
 }
 
-void Sound::fnPauseFx(void) {
+void Sound::fnPauseFx() {
 	if (!_isPaused) {
 		_isPaused = true;
 		//_mixer->pauseID(SOUND_CH0, true);
@@ -1334,7 +1334,7 @@ void Sound::fnPauseFx(void) {
 	}
 }
 
-void Sound::fnUnPauseFx(void) {
+void Sound::fnUnPauseFx() {
 	if (_isPaused) {
 		_isPaused = false;
 		//_mixer->pauseID(SOUND_CH0, false);

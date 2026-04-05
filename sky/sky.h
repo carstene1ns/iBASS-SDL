@@ -74,8 +74,8 @@ public:
 	SkyEngine(OSystem *syst);
 	virtual ~SkyEngine();
 
-	static bool isDemo(void);
-	static bool isCDVersion(void);
+	static bool isDemo();
+	static bool isCDVersion();
 
 	bool loadGameState(int slot);
 	bool saveGameState(int slot);
@@ -150,7 +150,7 @@ protected:
 	byte _fastMode;
 
 	void delay(int32 amount);
-	void handleKey(void);
+	void handleKey();
 
 	uint32 _lastSaveTime;
 	uint32 _delayCount;
@@ -167,7 +167,7 @@ protected:
 	void loadFixedItems();
 
 	bool _shouldQuit;
-	bool shouldQuit(void) const { return _shouldQuit; }	//from Engine base class
+	bool shouldQuit() const { return _shouldQuit; }	//from Engine base class
 
 	OSystem *_system;	//normally this would be in the Engine base class
 };
