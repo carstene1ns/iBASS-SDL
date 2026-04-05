@@ -1320,7 +1320,7 @@ uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 
 		while(!restartScript) {
 			command = *scriptData++; // get a command
-			Debug::script(command, scriptData);
+			//Debug::script(command, scriptData);
 
 			switch (command) {
 			case 0: // push_variable
