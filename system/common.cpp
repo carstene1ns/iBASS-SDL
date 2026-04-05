@@ -35,6 +35,17 @@ void error(const char *message, ...) {
 	exit (-1);
 }
 
+void debug(const char *message, ...) {
+	char buf[BUF_SIZE];
+	va_list va;
+
+	va_start(va, message);
+	vsnprintf(buf, BUF_SIZE, message, va);
+	va_end(va);
+
+	printf("DEBUG: %s\n", buf);
+}
+
 void debug(int level, const char *message, ...) {
 	if (level>2) return;
 

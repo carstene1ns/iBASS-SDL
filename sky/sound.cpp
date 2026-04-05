@@ -31,8 +31,8 @@
 #include "sky/sound.h"
 #include "sky/struc.h"
 
-//#include "sound/audiostream.h"
-//#include "sound/decoders/raw.h"
+//#include "audio/audiostream.h"
+//#include "audio/decoders/raw.h"
 
 namespace Sky {
 
@@ -312,7 +312,7 @@ static const Sfx fx_hello_helga = {
 	}
 };
 
-static const Sfx fx_statue_on_armour = {
+static const Sfx fx_statue_on_armor = {
 	8,
 	0,
 	{
@@ -984,7 +984,7 @@ static const Sfx *musicList[] = {
 	&fx_null, // 365
 	&fx_break_crystals, // 366
 	&fx_disintegrate, // 367
-	&fx_statue_on_armour, // 368
+	&fx_statue_on_armor, // 368
 	&fx_null, // 369
 	&fx_null, // 360
 	&fx_ping, // 371
@@ -1211,9 +1211,9 @@ void Sound::playSound(uint16 sound, uint16 volume, uint8 channel) {
 	}
 
 	if (channel == 0)
-		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound0, output, SOUND_CH0, volume, 0);
+		_mixer->playStream(Audio::Mixer::kSFXSoundType, &_ingameSound0, output, SOUND_CH0, volume, 0);
 	else
-		_mixer->playInputStream(Audio::Mixer::kSFXSoundType, &_ingameSound1, output, SOUND_CH1, volume, 0);
+		_mixer->playStream(Audio::Mixer::kSFXSoundType, &_ingameSound1, output, SOUND_CH1, volume, 0);
 #endif
 	_system->playSFX(g_section, sound, channel & 1, (float)volume / 255.0f, dataLoop != 0);
 }

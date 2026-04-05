@@ -33,8 +33,8 @@
  *
  * Status of this engine: ???
  *
- * Supported games:
- * - ???
+ * Games using this engine:
+ * - Beneath a Steel Sky
  */
 namespace Sky {
 
@@ -50,7 +50,6 @@ struct SystemVars {
 	bool paused;
 };
 
-struct Compact;
 class Sound;
 class Disk;
 class Text;
@@ -82,6 +81,8 @@ public:
 	SkyEngine(OSystem *syst);
 	virtual ~SkyEngine();
 
+	//virtual void syncSoundSettings();
+
 	static bool isDemo();
 	static bool isCDVersion();
 
@@ -101,8 +102,6 @@ public:
 	bool	autoSaveExists();//tony15july09
 	int		giveCurrentScreen();//tony16june09
 	void	initNewGame();//tony16june09
-
-	void gotTimerTick();	//for when we call it from an NSTimer
 
 	//hints viewed data - needs writing out ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#define	TOTAL_hint_answers	164
@@ -170,8 +169,6 @@ protected:
 	void initItemList();
 
 	void initVirgin();
-	static uint32 timerHandler(uint32 interval, void *ptr);
-
 	void loadFixedItems();
 
 	bool _shouldQuit;

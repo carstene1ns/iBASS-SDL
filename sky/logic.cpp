@@ -1908,7 +1908,7 @@ bool Logic::fnHighlight(uint32 itemNo, uint32 pen, uint32 c) {
 	pen += 241;
 	Compact *textCompact = _skyCompact->fetchCpt(itemNo);
 	uint8 *sprData = (uint8 *)SkyEngine::fetchItem(textCompact->flag);
-	_skyText->changeTextSpriteColour(sprData, (uint8)pen);
+	_skyText->changeTextSpriteColor(sprData, (uint8)pen);
 	return true;
 }
 
@@ -2510,7 +2510,7 @@ bool Logic::fnUnPauseFx(uint32 a, uint32 b, uint32 c) {
 }
 
 bool Logic::fnPrintf(uint32 a, uint32 b, uint32 c) {
-	printf("fnPrintf: %d\n", a);
+	debug("fnPrintf(%d, %d, %d)", a, b, c);
 	return true;
 }
 
@@ -2544,7 +2544,7 @@ void Logic::stdSpeak(Compact *target, uint32 textNum, uint32 animNum, uint32 bas
 		// form the text sprite, if player wants subtitles or
 		// if we couldn't find the speech file
 		DisplayedText textInfo;
-		textInfo = _skyText->lowTextManager(textNum, FIXED_TEXT_WIDTH, 0, (uint8)target->spColour, true);
+		textInfo = _skyText->lowTextManager(textNum, FIXED_TEXT_WIDTH, 0, (uint8)target->spColor, true);
 		//printf("Speak [%s]\n", _skyText->giveTextBuffer());
 		Compact *textCompact = _skyCompact->fetchCpt(textInfo.compactNum);
 		target->spTextId = textInfo.compactNum;	//So we know what text to kill

@@ -483,7 +483,7 @@ void OtherSystem_SDL::drawInvBackground() {
 void OtherSystem_SDL::setPalette(const uint8 *colors, int start, int num) {
 	for (int i = 0; i < num; i++) {
 		//32-bit
-		memcpy(&_pal32[start + i], &colors[i * 4], 4);
+		memcpy(&_pal32[start + i], &colors[i * 3], 3);
 		//set alpha: colour 0 should be fully transparant, all others fully opaque.
 		((uint8 *)&_pal32[start + i])[3] = (start + i) == 0 ? 0 : 0xFF;
 	}

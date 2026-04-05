@@ -42,7 +42,7 @@ void	Logic::Start_inventory(uint32	highlightedId)//tony23april2009
 //----------------------------------------------------------------------------------------------------------------------------------
 bool Logic::fnStartMenu(uint32 firstObject, uint32 highlightedId, uint32 c)
 {
-	/// initialise the top menu bar
+	/// initialize the top menu bar
 	// firstObject is o0 for game menu, k0 for linc
 
 	//normal inv is base object 276 + 30
@@ -119,7 +119,7 @@ bool Logic::fnStartMenu(uint32 firstObject, uint32 highlightedId, uint32 c)
 //	else if (menuLength < _scriptVariables[SCROLL_OFFSET] + 11)
 //		_scriptVariables[SCROLL_OFFSET] = menuLength - 11;
 
-	// (6) AND FINALLY, INITIALISE THE 11 OBJECTS SO THEY APPEAR ON SCREEEN
+	// (6) AND FINALLY, INITIALIZE THE 11 OBJECTS SO THEY APPEAR ON SCREEEN
 
 
 

@@ -78,6 +78,8 @@ Disk::Disk() {
 			FileEntry{filenum, offset, size, compressed_size});
 	}
 
+	debug("Found iBASS version v0.0%d (%d data entries)", determineGameVersion(), numFiles);
+
 	memset(_buildList, 0, 60 * 2);
 	memset(_loadedFilesList, 0, 60 * 4);
 }

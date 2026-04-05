@@ -94,6 +94,24 @@ SkyEngine::~SkyEngine() {
 	_inited = false;
 }
 
+#if 0
+void SkyEngine::syncSoundSettings() {
+	Engine::syncSoundSettings();
+
+	bool mute = false;
+	if (ConfMan.hasKey("mute"))
+		mute = ConfMan.getBool("mute");
+
+	if (ConfMan.getBool("sfx_mute"))
+		SkyEngine::_systemVars.systemFlags |= SF_FX_OFF;
+
+	if (ConfMan.getBool("music_mute"))
+		SkyEngine::_systemVars.systemFlags |= SF_MUS_OFF;
+
+	_skyMusic->setVolume(mute ? 0: ConfMan.getInt("music_volume") >> 1);
+}
+#endif
+
 void SkyEngine::initVirgin() {
 	_skyScreen->setPalette(60111);
 	_skyScreen->showScreen(60110);
@@ -189,7 +207,7 @@ bool SkyEngine::init() {
 	_saveLoad = new SaveLoad(_skyScreen, _skyDisk, _skyMouse, _skyText, _skyMusic, _skyLogic, _skySound, _skyCompact, _system);
 
 	if (!_skyDisk->fileExists(60600 + SkyEngine::_systemVars.language * 8)) {
-		warning("The language you selected does not exist in your BASS version.");
+		warning("The language you selected does not exist in your BASS version");
 		if (_skyDisk->fileExists(60600))
 			SkyEngine::_systemVars.language = SKY_ENGLISH; // default to GB english if it exists..
 		else if (_skyDisk->fileExists(60600 + SKY_USA * 8))
@@ -201,6 +219,9 @@ bool SkyEngine::init() {
 					break;
 				}
 	}
+
+	// Setup mixer
+	//syncSoundSettings();
 
 	//Stuff taken from go()...
 
@@ -306,6 +327,7 @@ bool SkyEngine::runGameCycle() {
 			}
 			//-----------------------------------------------------------------
 
+			_skyScreen->processSequence();
 			_skyScreen->recreate();
 			_skyScreen->spriteEngine();
 #if 0
@@ -373,15 +395,6 @@ void SkyEngine::loadFixedItems() {
 
 void *SkyEngine::fetchItem(uint32 num) {
 	return _itemList[num];
-}
-
-uint32 SkyEngine::timerHandler(uint32 interval, void *refCon) {
-	((SkyEngine *)refCon)->gotTimerTick();
-        return 1000 / 50;
-}
-
-void SkyEngine::gotTimerTick() {
-	_skyScreen->handleTimer();
 }
 
 // TODO: eventmanager
