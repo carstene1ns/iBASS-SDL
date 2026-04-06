@@ -25,6 +25,7 @@
 
 #include "common/system.h"
 #include "common/file.h"
+#include "runtime.h"
 #include "sky/compact.h"
 #include "sky/saveload.h"
 #include "sky/disk.h"
@@ -40,9 +41,6 @@
 #include "sky/compact.h"
 
 namespace Sky {
-
-	extern "C"	bool	isUSA();//tony28july09
-	extern "C"	int	returnIPhoneLanguage();//tony28july09
 
 //----------------------------------------------------------------------------------------------------------------------------------
 
@@ -146,7 +144,7 @@ void	SaveLoad::initExtraData()//tony14july09
 
 
 		//get the language from machine settings
-		SkyEngine::_systemVars.language=returnIPhoneLanguage();
+		SkyEngine::_systemVars.language=returnSystemLanguage();
 
 		//special override
 		if	(isUSA())

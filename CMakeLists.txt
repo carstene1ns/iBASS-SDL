@@ -64,6 +64,8 @@ add_executable(sdlBASS
 	src/gui/panels/start.h
 	src/iBASS_fake.cpp
 	src/main.cpp
+	src/runtime.cpp
+	src/runtime.h
 	src/sky/autoroute.cpp
 	src/sky/autoroute.h
 	src/sky/compact.cpp
