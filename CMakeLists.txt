@@ -73,7 +73,6 @@ add_executable(sdlBASS
 	sky/grid.cpp
 	sky/grid.h
 	sky/hufftext.cpp
-	sky/inventory.cpp
 	sky/logic.cpp
 	sky/logic.h
 	sky/mouse.cpp

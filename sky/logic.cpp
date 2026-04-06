@@ -1235,6 +1235,8 @@ uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 			if (moduleNo==1) {
 				uint16 *scriptDataTemp = scriptData+scriptData[98];
 				*(scriptDataTemp+0x32)=140;
+
+				debug("iBASS: Elevator hack activated!");
 			}
 		}
 
@@ -1243,6 +1245,8 @@ uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 		//iBASS: hack for skipping old end sequence
 		if (0 == moduleNo && (scriptNo & 0xFFF) == 74 && offset == 14139) {
 			offset = 14408;
+
+			debug("iBASS: skipping old end sequence!");
 		}
 
 		debug(3, "Doing Script: %d:%d:%x", moduleNo, scriptNo & 0xFFF, offset ? (offset - moduleStart[scriptNo & 0xFFF]) : 0);
@@ -1271,6 +1275,8 @@ uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 				*(scriptData+0x58) = 60;
 				*(scriptData+0x65) = 60;
 				*(scriptData+0x72) = 60;
+
+				debug("iBASS: hobbins transporter pauses...");
 			}
 		}
 
@@ -1377,23 +1383,23 @@ uint16 Logic::script(uint16 scriptNo, uint16 offset) {
 					//fnPause == 60
 #if 0
 					if (moduleNo == 1 && scriptNum == 161 && mcode == 60) {
-						printf("Jobs script pause: %d (offs: %x)\n", a, scriptOffs);
+						debug("iBASS: Jobs script pause: %d (offs: %x)", a, scriptOffs);
 					}
 #endif
 					//eyeball 91
 					if (moduleNo == 6 && scriptNum == 59 && mcode == 60 && a==10) {
-						printf("Eyeball script pause: %d (offs: %x)\n", a, scriptOffs);
+						debug("iBASS: Eyeball script pause %d (offs: %x)", a, scriptOffs);
 						a=50;
 					}
 					//eyeball 90
 					if (moduleNo == 6 && scriptNum == 32 && mcode == 60 && a==280) {
-						printf("Eyeball script pause: %d (offs: %x)\n", a, scriptOffs);
+						debug("iBASS: Eyeball script pause: %d (offs: %x)", a, scriptOffs);
 						a=1000;
 					}
 #if 0
 					//tissue
 					if (moduleNo == 5 && scriptNum == 253 && mcode == 60 && a==130) {
-						printf("Tissue script pause: %d (offs: %x)\n", a, scriptOffs);
+						debug("iBASS: Tissue script pause: %d (offs: %x)", a, scriptOffs);
 						a=1000;
 					}
 #endif
@@ -1962,7 +1968,144 @@ bool Logic::fnCheckRequest(uint32 a, uint32 b, uint32 c) {
 	return false; // drop from script
 }
 
-//iBASS: bool Logic::fnStartMenu in inventory.cpp
+//----------------------------------------------------------------------------------------------------------------------------------
+bool Logic::fnStartMenu(uint32 firstObject, uint32 highlightedId, uint32 c) {
+	/// initialize the top menu bar
+	// firstObject is o0 for game menu, k0 for linc
+
+	//normal inv is base object 276 + 30
+
+	Compact *cpt;
+
+//	printf("Init inv menu %d ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n\n\n", firstObject);
+
+	//safety flag
+	_liveInv=true;
+
+	if	(firstObject==2048)		_skyMouse->setLincInv(true);
+	else if	(firstObject==2168)	_skyMouse->setLincInv(true);
+	else if	(firstObject==2288)	_skyMouse->setLincInv(true);
+	else						_skyMouse->setLincInv(false);
+
+	_skyMouse->incLincMenuRef();//mental hack to make linc inv work
+	_skyMouse->giveSystem()->hideInventory();
+	_skyMouse->giveSystem()->clearAllInvIcons();
+
+	uint i;
+	firstObject /= 4;
+
+#if 0
+	// (1) FIRST, SET UP THE 2 ARROWS SO THEY APPEAR ON SCREEN
+
+	Compact *cpt = _skyCompact->fetchCpt(47);
+	cpt->status = ST_MOUSE + ST_FOREGROUND + ST_LOGIC + ST_RECREATE;
+	cpt->screen = (uint16)(_scriptVariables[SCREEN] & 0xffff);
+
+	cpt = _skyCompact->fetchCpt(48);
+	cpt->status = ST_MOUSE + ST_FOREGROUND + ST_LOGIC + ST_RECREATE;
+	cpt->screen = (uint16)(_scriptVariables[SCREEN] & 0xffff);
+#endif
+
+	// (2) COPY OBJECTS FROM NON-ZERO INVENTORY VARIABLES INTO OBJECT DISPLAY LIST (& COUNT THEM)
+
+	// sort the objects and pad with blanks
+	uint32 menuLength = 0;
+	for (i = firstObject; i < firstObject + ARRAYSIZE(_objectList); i++)
+	{
+		//skip unused linc items
+		if	(_scriptVariables[i]==24581 ||_scriptVariables[i]==24628)
+			continue;
+
+		if (_scriptVariables[i])
+			_objectList[menuLength++] = _scriptVariables[i];
+	}
+	_scriptVariables[MENU_LENGTH] = menuLength;
+
+//	printf("Menu len %d\n\n\n",menuLength);
+
+#if 0
+	// (3) OK, NOW TOP UP THE LIST WITH THE REQUIRED NO. OF BLANK OBJECTS (for min display length 11)
+
+	uint32 blankID = 51;
+	for (i = menuLength; i < 11; i++)
+		_objectList[i] = blankID++;
+
+	// (4) KILL ID's OF ALL 20 OBJECTS SO UNWANTED ICONS (SCROLLED OFF) DON'T REMAIN ON SCREEN
+	// (There should be a better way of doing this - only kill id of 12th item when menu has scrolled right)
+
+	for (i = 0; i < ARRAYSIZE(_objectList); i++)
+	{
+		if (_objectList[i])
+			(_skyCompact->fetchCpt(_objectList[i]))->status = ST_LOGIC;
+		else break;
+	}
+
+	// (5) NOW FIND OUT WHICH OBJECT TO START THE DISPLAY FROM (depending on scroll offset)
+
+	if (menuLength < 11) // check we can scroll
+		_scriptVariables[SCROLL_OFFSET] = 0;
+	else if (menuLength < _scriptVariables[SCROLL_OFFSET] + 11)
+		_scriptVariables[SCROLL_OFFSET] = menuLength - 11;
+
+	// (6) AND FINALLY, INITIALIZE THE 11 OBJECTS SO THEY APPEAR ON SCREEEN
+#endif
+
+	// iBASS: max 16 items in 2 rows
+
+	uint16 rollingX = TOP_LEFT_X + XWIDTH;
+	int	xx=0;
+	uint16 rollingY=236;
+
+	int	didx, didy;
+	didx=0;
+	didy=1;
+
+	for (i = 0; i < menuLength; i++)
+	{
+		if (xx==8)
+		{
+			rollingX = TOP_LEFT_X + XWIDTH;
+			xx=0;
+			rollingY += YDEPTH;
+
+			didy++;
+		}
+
+		cpt = _skyCompact->fetchCpt(_objectList[i]);
+		//printf("Init i=%d ob=%d fr=%d\n", i, _objectList[i],cpt->frame);
+
+		cpt->status = ST_MOUSE + ST_FOREGROUND + /*ST_LOGIC +*/ ST_RECREATE;
+		cpt->screen = 999;//(uint16)(_scriptVariables[SCREEN] & 0xffff);
+		//cpt->screen = (uint16)(_scriptVariables[SCREEN] & 0xffff);
+
+		cpt->xcood = rollingX;
+		cpt->ycood = rollingY;//112;
+
+		int	frame=cpt->frame;
+
+		//if LINC then check for odd frames and mask off :O :O
+		if	(_objectList[i]>20000)
+			if	(!(frame&1))
+				frame--;
+
+		_skyMouse->giveSystem()->addInvIcon(frame, rollingX-TOP_LEFT_X, rollingY-TOP_LEFT_Y, (highlightedId==_objectList[i]));
+
+		rollingX += XWIDTH;
+
+		xx++;
+
+		if	(didy==1)
+			didx++;
+	}
+
+	//tell mouse engine inv dimensions
+	_skyMouse->SetInvDims(TOP_LEFT_X + XWIDTH, 236, (didx*XWIDTH),(didy*YDEPTH));
+
+	//init inv bg
+	_skyMouse->giveSystem()->showInventory(XWIDTH, (236-TOP_LEFT_Y), XWIDTH+(8*XWIDTH),(236-TOP_LEFT_Y)+(didy*YDEPTH));
+
+	return true;
+}
 
 bool Logic::fnUnhighlight(uint32 item, uint32 b, uint32 c) {
 	printf("fnUnhighlight\n");
@@ -2397,7 +2540,38 @@ bool Logic::fnPrintCredit(uint32 a, uint32 b, uint32 c) {
 	return true;
 }
 
-//iBASS: bool Logic::fnLookAt in inventory.cpp
+//----------------------------------------------------------------------------------------------------------------------------------
+bool Logic::fnLookAt(uint32 a, uint32 b, uint32 c) {
+//this is inventory left-button look-at
+
+//	printf("fnLookAt\n");
+	DisplayedText textInfo = _skyText->lowTextManager(a, 240, 0, 248, true);
+	Compact *textCpt = _skyCompact->fetchCpt(textInfo.compactNum);
+	textCpt->xcood = 168;
+	textCpt->ycood = (uint16)c;
+
+	//fetch the clicked on compact
+	Compact *clickObject = _skyCompact->fetchCpt(_skyMouse->giveClickedOnId());
+	//push back to new inv coordinate, for this render, now logic has run and emerged here
+
+	//get y coord of this inv item back
+	clickObject->ycood=_skyMouse->popInvY();
+
+	_skyScreen->recreate();
+	_skyScreen->spriteEngine();
+	_skyScreen->flip();
+
+	fnNoHuman(0, 0, 0);
+	_skyMouse->lockMouse();
+
+	_skyMouse->waitMouseNotPressed(3000);
+
+	_skyMouse->unlockMouse();
+	fnAddHuman(0, 0, 0);
+	textCpt->status = 0;
+
+	return true;
+}
 
 bool Logic::fnLincTextModule(uint32 textPos, uint32 textNo, uint32 buttonAction) {
 	uint16 cnt;
@@ -2577,6 +2751,42 @@ void Logic::stdSpeak(Compact *target, uint32 textNum, uint32 animNum, uint32 bas
 		target->spTextId = 0;
 	}
 	target->logic = L_TALK;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------
+void Logic::Start_inventory(uint32 highlightedId)//tony23april2009
+{
+	//normal gameplay inv
+	fnStartMenu(_scriptVariables[FIRST_ICON],highlightedId,0);
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------
+void Logic::KillInventory()//tony26april09
+{
+	//shut down displayed inv objects
+
+//	printf("KillMenu len %d\n\n\n",_scriptVariables[MENU_LENGTH]);
+
+	if	(_liveInv)
+	{
+		//an sfx
+		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
+
+		for (size_t j=0;j<_scriptVariables[MENU_LENGTH];j++)
+		{
+	//		printf(" Kill %d\n",_objectList[j]);
+			//fetch the compact
+			Compact *itemData = _skyCompact->fetchCpt(_objectList[j]);
+
+			itemData->status=0;
+		}
+	}
+
+	_liveInv=false;
+
+	//kill inv bg
+	_skyMouse->giveSystem()->hideInventory();
+	_skyMouse->giveSystem()->clearAllInvIcons();
 }
 
 } // End of namespace Sky

@@ -36,6 +36,7 @@ void error(const char *message, ...) {
 }
 
 void debug(const char *message, ...) {
+#ifndef NDEBUG
 	char buf[BUF_SIZE];
 	va_list va;
 
@@ -44,9 +45,11 @@ void debug(const char *message, ...) {
 	va_end(va);
 
 	printf("DEBUG: %s\n", buf);
+#endif
 }
 
 void debug(int level, const char *message, ...) {
+#ifndef NDEBUG
 	if (level>2) return;
 
 	char buf[BUF_SIZE];
@@ -57,6 +60,7 @@ void debug(int level, const char *message, ...) {
 	va_end(va);
 
 	printf("DEBUG: %s\n", buf);
+#endif
 }
 
 void warning(const char *message, ...) {

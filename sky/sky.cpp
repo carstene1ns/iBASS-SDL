@@ -273,7 +273,7 @@ bool SkyEngine::runGameCycle() {
 			//if death screen, then init death panel
 			if	(Logic::_scriptVariables[SCREEN]==102)
 			{
-				printf("Death!\n");
+				debug("Death!");
 				//pauseEngine();
 
 				//_system->stopMusic();
@@ -286,7 +286,7 @@ bool SkyEngine::runGameCycle() {
 			//end credits
 			if	(Logic::_scriptVariables[23]==42)
 			{
-				printf("End!\n");
+				debug("End!");
 				pauseEngine(false);
 
 				CPP_endMovie();
@@ -602,11 +602,9 @@ void	SkyEngine::initNewGame()//tony16june09
 void	SkyEngine::setHintAnswerSeen(int answer)//tony16june09
 {
 	//printf("setSeen %d %d\n", answer, answerSeen[answer]);
-
 	if(answer>=TOTAL_hint_answers)
 	{
-		printf("setHintAnswerSeen says illegal answer %d\n", answer);
-		exit(1);
+		error("setHintAnswerSeen says illegal answer %d", answer);
 	}
 	answerSeen[answer]=true;
 }
@@ -615,8 +613,7 @@ bool	SkyEngine::isHintAnswerSeen(int answer)//tony16june09
 	//printf("isSeen %d %d\n", answer, answerSeen[answer]);
 	if(answer>=TOTAL_hint_answers)
 	{
-		printf("isHintAnswerSeen says illegal answer %d\n", answer);
-		exit(1);
+		error("isHintAnswerSeen says illegal answer %d", answer);
 	}
 	return	answerSeen[answer];
 }
@@ -626,7 +623,7 @@ void	SkyEngine::setSeenScreen(int screen)//tony21july09
 {
 	if(screen>=TOTAL_screens)
 	{
-		printf("isHintAnswerSeen says illegal screen %d\n", screen);
+		debug("setSeenScreen says illegal screen %d", screen);
 		return;
 	}
 	seenScreen[screen]=true;
@@ -635,7 +632,7 @@ bool	SkyEngine::hasSeenScreen(int screen)//tony21july09
 {
 	if(screen>=TOTAL_screens)
 	{
-		printf("hasSeenScreen says illegal screen %d\n", screen);
+		debug("hasSeenScreen says illegal screen %d", screen);
 		return false;
 	}
 	return	seenScreen[screen];
@@ -696,11 +693,13 @@ void SkyEngine::pauseEngine(bool audio)
 {
 	if	(audio)
 	{
-		printf("Pause audio\n");
+		//printf("Pause audio\n");
 		Sky::g_engine->giveSystem()->pauseAudioForMenu(true);
 	}
 	else
-		printf("NOT Pause audio\n");
+	{
+		//printf("NOT Pause audio\n");
+	}
 
 	_systemVars.paused=true;
 }
