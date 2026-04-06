@@ -8,8 +8,8 @@
 
 CPanelAudio::CPanelAudio(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
-	_panel->getRenderer()->setBackgroundColor({0, 0, 0, 175});
-	//_panel->getRenderer()->setTextureBackground({"gui/bg_plain.png"});
+	//_panel->getRenderer()->setBackgroundColor({0, 0, 0, 175});
+	_panel->getRenderer()->setTextureBackground({"gui/bg_plain.png"});
 
 	// position on left side
 	auto vert = tgui::GrowVerticalLayout::create("50%");
@@ -72,7 +72,7 @@ void CPanelAudio::Cleanup() {
 void CPanelAudio::backToSettings() {
 	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
 	Sky::g_engine->writeExtraData(); //save the states
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 }
 
 void CPanelAudio::sfxVolumeChanged(float val) {

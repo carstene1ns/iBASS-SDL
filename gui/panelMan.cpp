@@ -2,6 +2,7 @@
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SDL-Renderer.hpp>
 
+#include "system/common.h"
 #include "gui/panelMan.h"
 #include "gui/panel.h"
 
@@ -90,11 +91,15 @@ void CPanelMan::PushPanel(Panel panel) {
 	_panels.back()->Init();
 }
 
-void CPanelMan::PopPanel() {
+void CPanelMan::PopPanel(CPanel *panel) {
 	// cleanup the current panel
 	if (!_panels.empty()) {
-		_panels.back()->Cleanup();
-		_panels.pop_back();
+		if(_panels.back() == panel) {
+			panel->Cleanup();
+			_panels.pop_back();
+		} else {
+			warning("Panel not active!");
+		}
 	}
 
 	// resume previous panel

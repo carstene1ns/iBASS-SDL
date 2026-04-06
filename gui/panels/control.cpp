@@ -77,7 +77,7 @@ void CPanelControl::Cleanup() {
 }
 
 void CPanelControl::backToGame() {
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 	Sky::g_engine->unPauseEngine();
 }
 

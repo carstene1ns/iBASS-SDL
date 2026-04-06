@@ -27,7 +27,7 @@ public:
 
 	void ChangePanel(Panel panel);
 	void PushPanel(Panel panel);
-	void PopPanel();
+	void PopPanel(CPanel *panel);
 	void PopAllPanels();
 
 	tgui::Gui *giveGui() {

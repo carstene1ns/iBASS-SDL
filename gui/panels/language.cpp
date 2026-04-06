@@ -132,11 +132,11 @@ void CPanelLanguage::backToPanel() {
 	//save the states
 	Sky::g_engine->writeExtraData();
 
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 }
 
 void CPanelLanguage::picChangeLanguage(int id) {
-	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
+	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
 
 	Sky::g_engine->setLanguageFlag(id);
 
@@ -144,7 +144,7 @@ void CPanelLanguage::picChangeLanguage(int id) {
 }
 
 void CPanelLanguage::btnChangeLanguage(int id, bool isDown) {
-	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
+	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
 
 	if(isDown)
 		Sky::g_engine->setLanguageFlag(id);
@@ -153,7 +153,7 @@ void CPanelLanguage::btnChangeLanguage(int id, bool isDown) {
 }
 
 void CPanelLanguage::toggleTextOrSpeech(bool isText, bool isDown) {
-	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
+	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
 
 	// there are 3 cases: one of text/speech or both
 	int flags = Sky::g_engine->giveSystemFlags();

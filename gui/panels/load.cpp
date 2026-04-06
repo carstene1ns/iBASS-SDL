@@ -39,9 +39,8 @@ CPanelLoad::CPanelLoad(CPanelMan *mgr) : CPanel(mgr) {
 	};
 
 	// add 2 buttons
-	auto backButton = makeButton("Back", &CPanelLoad::backToPanel);
 	confirmButton = makeButton("Load Game", &CPanelLoad::loadGame);
-	confirmButton->setEnabled(false);
+	auto backButton = makeButton("Back", &CPanelLoad::backToPanel);
 
 	_panel->add(savegameTabs);
 	_panel->add(vert);
@@ -59,14 +58,15 @@ void CPanelLoad::Init() {
 		savegameTabs->setTabEnabled(0, true);
 	}
 	for (int i = 1; i < MAX_saves; i++) {
+		savegameTabs->setTabEnabled(i, Sky::g_engine->slotUsed(i));
 		if(Sky::g_engine->slotUsed(i)) {
 			savegameTabs->changeText(i, Sky::g_engine->giveSlotAscii(i));
 		} else {
 			savegameTabs->changeText(i, asciiData::giveLine(1248));
-			savegameTabs->setTabEnabled(i, false);
 		}
 	}
 	savegameTabs->deselect();
+	confirmButton->setEnabled(false);
 
 	show();
 }
@@ -76,20 +76,24 @@ void CPanelLoad::Cleanup() {
 }
 
 void CPanelLoad::backToPanel() {
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 }
 
 void CPanelLoad::loadGame() {
-	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
-
 	int slot = savegameTabs->getSelectedIndex();
 
-	if (slot == -1) return;
+	if (slot == -1) { // this should not happen
+		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_BLEEP_FAIL);
+		return;
+	}
 
 	//load the game
 	if (Sky::g_engine->loadGameState(slot)) {
+		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
 		_mgr->PopAllPanels();// close load + start/control/death
 		Sky::g_engine->unPauseEngine(false);//start game doing its thing again
-	} else
+	} else {
+		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_BLEEP_FAIL);
 		warning("Failed to load slot %d\n", slot);
+	}
 }

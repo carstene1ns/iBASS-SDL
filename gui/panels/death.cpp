@@ -55,7 +55,7 @@ void CPanelDeath::Cleanup() {
 
 void CPanelDeath::continueGame() {
 	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 	Sky::g_engine->loadGameState(0);//game slot 0 is the auto-saved game
 	Sky::g_engine->unPauseEngine();
 }

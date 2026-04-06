@@ -62,7 +62,7 @@ void CPanelStart::newGame() {
 
 	// TODO: skipping the movie here
 
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 	Sky::g_engine->unPauseEngine();
 	Sky::g_engine->initNewGame();
 }
@@ -80,7 +80,7 @@ void CPanelStart::showLanguagePanel() {
 void CPanelStart::continueGame() {
 	Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_INTO);
 	Sky::g_engine->loadGameState(0); //game slot 0 is the auto-saved game
-	_mgr->PopPanel();
+	_mgr->PopPanel(this);
 	Sky::g_engine->unPauseEngine();
 }
 
