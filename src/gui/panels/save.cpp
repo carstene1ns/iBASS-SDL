@@ -1,16 +1,18 @@
 
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Backend/SDL-Renderer.hpp>
+#include <string>
 
-#include "gui/panels/load.h"
+#include "gui/panels/save.h"
 #include "gui/panelMan.h"
 #include "gui/asciiData.h"
 #include "sky/sky.h"
 #include "sky/saveload.h"
 
-CPanelLoad::CPanelLoad(CPanelMan *mgr) : CPanel(mgr) {
+CPanelSave::CPanelSave(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
-	_panel->getRenderer()->setTextureBackground({"gui/bg_plain.png"});
+	//_panel->getRenderer()->setBackgroundColor({0, 0, 0, 175});
+	_panel->getRenderer()->setTextureBackground({"data/gui/bg_plain.png"});
 
 	// add save game selection
 	savegameTabs = tgui::VerticalTabs::create();
@@ -28,7 +30,8 @@ CPanelLoad::CPanelLoad(CPanelMan *mgr) : CPanel(mgr) {
 	vert->setPosition("66%", "50%");
 	vert->getRenderer()->setSpaceBetweenWidgets(80);
 
-	auto makeButton = [&](const char *text, void (CPanelLoad::*func)()) {
+	// factory
+	auto makeButton = [&](const char *text, void (CPanelSave::*func)()) {
 		auto btn = tgui::Button::create(text);
 		btn->setHeight(40);
 		btn->setTextSize(24);
@@ -39,8 +42,8 @@ CPanelLoad::CPanelLoad(CPanelMan *mgr) : CPanel(mgr) {
 	};
 
 	// add 2 buttons
-	confirmButton = makeButton("Load Game", &CPanelLoad::loadGame);
-	auto backButton = makeButton("Back", &CPanelLoad::backToPanel);
+	confirmButton = makeButton("Save Game", &CPanelSave::saveGame);
+	auto backButton = makeButton("Back", &CPanelSave::backToPanel);
 
 	_panel->add(savegameTabs);
 	_panel->add(vert);
@@ -48,38 +51,37 @@ CPanelLoad::CPanelLoad(CPanelMan *mgr) : CPanel(mgr) {
 	_mgr->giveGui()->add(_panel);
 }
 
-CPanelLoad::~CPanelLoad() {
+CPanelSave::~CPanelSave() {
 	_mgr->giveGui()->remove(_panel);
 }
 
-void CPanelLoad::Init() {
+void CPanelSave::Init() {
 	if(Sky::g_engine->autoSaveExists()) {
 		savegameTabs->changeText(0, "Autosave");
-		savegameTabs->setTabEnabled(0, true);
+		savegameTabs->setTabEnabled(0, false);
 	}
 	for (int i = 1; i < MAX_saves; i++) {
-		savegameTabs->setTabEnabled(i, Sky::g_engine->slotUsed(i));
 		if(Sky::g_engine->slotUsed(i)) {
 			savegameTabs->changeText(i, Sky::g_engine->giveSlotAscii(i));
 		} else {
 			savegameTabs->changeText(i, asciiData::giveLine(1248));
 		}
 	}
-	savegameTabs->deselect();
 	confirmButton->setEnabled(false);
+	savegameTabs->deselect();
 
 	show();
 }
 
-void CPanelLoad::Cleanup() {
+void CPanelSave::Cleanup() {
 	hide();
 }
 
-void CPanelLoad::backToPanel() {
+void CPanelSave::backToPanel() {
 	_mgr->PopPanel(this);
 }
 
-void CPanelLoad::loadGame() {
+void CPanelSave::saveGame() {
 	int slot = savegameTabs->getSelectedIndex();
 
 	if (slot == -1) { // this should not happen
@@ -87,13 +89,15 @@ void CPanelLoad::loadGame() {
 		return;
 	}
 
-	//load the game
-	if (Sky::g_engine->loadGameState(slot)) {
+	//save the game
+	if (Sky::g_engine->saveGameState(slot)) {
 		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_MENU_ACK);
-		_mgr->PopAllPanels();// close load + start/control/death
-		Sky::g_engine->unPauseEngine(false);//start game doing its thing again
+		std::string placeholder = asciiData::giveLine(1249);
+		placeholder += " " + std::to_string(slot + 1);
+		Sky::g_engine->setSlotAscii(slot, placeholder.c_str());
+		savegameTabs->changeText(slot, Sky::g_engine->giveSlotAscii(slot));
 	} else {
 		Sky::g_engine->giveSystem()->playUISFX(UI_SOUND_BLEEP_FAIL);
-		warning("Failed to load slot %d\n", slot);
+		warning("Failed to save slot %d\n", slot);
 	}
 }

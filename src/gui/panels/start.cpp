@@ -8,7 +8,7 @@
 
 CPanelStart::CPanelStart(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
-	_panel->getRenderer()->setTextureBackground({"gui/bg_w_logo.png"});
+	_panel->getRenderer()->setTextureBackground({"data/gui/bg_w_logo.png"});
 
 	auto vert = tgui::GrowVerticalLayout::create("33%");
 	vert->setOrigin(0.5f, 0.5f);

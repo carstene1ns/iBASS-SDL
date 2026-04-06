@@ -9,7 +9,7 @@
 CPanelAudio::CPanelAudio(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
 	//_panel->getRenderer()->setBackgroundColor({0, 0, 0, 175});
-	_panel->getRenderer()->setTextureBackground({"gui/bg_plain.png"});
+	_panel->getRenderer()->setTextureBackground({"data/gui/bg_plain.png"});
 
 	// position on left side
 	auto vert = tgui::GrowVerticalLayout::create("50%");

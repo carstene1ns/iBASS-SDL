@@ -11,10 +11,11 @@ speech.dat
 *.mp3
 *.tex
 # iOS App GUI
-iBASS/menu/*.png
-iBASS/menu_*/*.png
+iBASS/**/*.png
+iBASS/**/*.jpg
 
 # Savegames
+save/
 SKY-VM.00?
 SKY-HINTS.00?
 SAVESLOTS.ADW

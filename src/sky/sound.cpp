@@ -1027,7 +1027,7 @@ int g_section = 0;
 #define ASSERT(x) assert(x)
 
 SpeechFileSystem::SpeechFileSystem() : _fp(0) {
-	_fp = fopen("./speech.dat", "rb");
+	_fp = fopen("./data/speech.dat", "rb");
 	ASSERT(_fp);
 
 	char magic[4];

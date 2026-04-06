@@ -36,7 +36,7 @@ namespace Sky {
 #define ASSERT(x) assert(x)
 
 Disk::Disk() {
-	_fp = fopen("./bass.dat", "rb");
+	_fp = fopen("./data/bass.dat", "rb");
 	ASSERT(_fp);
 
 	char magic[4];

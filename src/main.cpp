@@ -109,8 +109,8 @@ void mainLoop() {
 
 	panelMgr = std::make_unique<CPanelMan>(gui);
 
-	Common::File::addPath("./");
-	SaveFile::setSavePath(".");
+	Common::File::addPath("./data/");
+	SaveFile::setSavePath("./save");
 
 	auto system = std::make_unique<OtherSystem_SDL>(window, renderer);
 	assert(system);
@@ -200,7 +200,7 @@ bool startSDL() {
 	});
 
 	// window icon
-	cp_image_t img = cp_load_png("icon.png");
+	cp_image_t img = cp_load_png("data/icon.png");
 	if(img.pix) {
 		SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormatFrom(img.pix,
 			img.w, img.h, 0, img.w * 4, SDL_PIXELFORMAT_RGBA32);
@@ -223,7 +223,7 @@ bool startSDL() {
 	});
 
 	// splash image
-	img = cp_load_png("splash.png");
+	img = cp_load_png("data/splash.png");
 	if(img.pix) {
 		SDL_Surface *tmp = SDL_CreateRGBSurfaceWithFormatFrom(img.pix,
 			img.w, img.h, 0, img.w * 4, SDL_PIXELFORMAT_RGBA32);

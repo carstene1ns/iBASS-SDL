@@ -184,7 +184,7 @@ static Mix_Chunk* loadSound(const char *name) {
 	char filename[32];
 
 	// first try relocated assets
-	snprintf(filename, sizeof(filename), "sfx/%s.caf", name);
+	snprintf(filename, sizeof(filename), "data/sfx/%s.caf", name);
 	void *buf = loadFileToMem(filename);
 	if(!buf) {
 		// try original location
@@ -254,8 +254,8 @@ OtherSystem_SDL::OtherSystem_SDL(SDL_Window *window, SDL_Renderer *renderer) :
 		SDL_TEXTUREACCESS_TARGET, GAME_ARC_W * SCALE_FACTOR_ARC_W,
 		GAME_ARC_H * SCALE_FACTOR_ARC_H);
 
-	_uiTexture = loadPNG("gui/ui.png");
-	_invTexture = loadPNG("gui/inv.png");
+	_uiTexture = loadPNG("data/gui/ui.png");
+	_invTexture = loadPNG("data/gui/inv.png");
 
 	// restore scale hint
 	if(hint)
@@ -795,7 +795,7 @@ void OtherSystem_SDL::startMusic(int section, int song) {
 	char musicFile[32];
 	int musNum = (section * 100) + song;
 	// first try relocated assets
-	snprintf(musicFile, sizeof(musicFile), "music/music_%03d.mp3", musNum);
+	snprintf(musicFile, sizeof(musicFile), "data/music/music_%03d.mp3", musNum);
 	_music = Mix_LoadMUS(musicFile);
 	if(!_music) {
 		// try original location

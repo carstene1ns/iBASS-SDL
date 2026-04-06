@@ -11,7 +11,7 @@
 
 CPanelLanguage::CPanelLanguage(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
-	_panel->getRenderer()->setTextureBackground({"gui/bg_plain.png"});
+	_panel->getRenderer()->setTextureBackground({"data/gui/bg_plain.png"});
 
 	// position flags on left side
 	langEntries = tgui::GrowVerticalLayout::create("50%");
@@ -29,7 +29,7 @@ CPanelLanguage::CPanelLanguage(CPanelMan *mgr) : CPanel(mgr) {
 		horz->setHeight(40);
 		horz->getRenderer()->setSpaceBetweenWidgets(2);
 
-		std::string filename = "gui/" + std::string(tag) + std::string(".svg");
+		std::string filename = "data/gui/" + std::string(tag) + std::string(".svg");
 		auto pic = tgui::Picture::create({filename});
 		pic->setSize({1500/(1000/40), 40});
 		pic->onClick(&CPanelLanguage::picChangeLanguage, this, id);

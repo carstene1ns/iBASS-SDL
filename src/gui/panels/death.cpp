@@ -9,7 +9,7 @@
 
 CPanelDeath::CPanelDeath(CPanelMan *mgr) : CPanel(mgr) {
 	_panel = tgui::Panel::create();
-	_panel->getRenderer()->setTextureBackground({"gui/bg_death.png"});
+	_panel->getRenderer()->setTextureBackground({"data/gui/bg_death.png"});
 
 	auto horz = tgui::GrowHorizontalLayout::create("80%");
 	horz->setOrigin(0.5f, 0.5f);
